@@ -1,0 +1,1 @@
+https://shibajuku.net/vscode-liveserver/

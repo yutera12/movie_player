@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <title>Movie Player</title>
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <script src="https://unpkg.com/vue@3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  </head>
+  <body>
+    <main>
+      <div id="app">
+        <video
+          id="video"
+          controlslist="nodownload"
+          oncontextmenu="return false"
+          :src="filePath"
+          preload
+          style="position: absolute; width:100%; height: 100%; z-index:-100; background: black"
+          @click="pause_or_play()"
+        ></video>
+        <div
+          style="width: 50px; height: 50px; border-radius:50%; background: rgb(255,255,255,0.5); position: absolute; bottom: 5px; left: 5px;"
+        ></div>
+        <div
+          style="width: 50px; height: 50px; border-radius:50%; background: rgb(255,255,255,0.5); position: absolute; bottom: 5px; left: 59px;"
+        ></div>
+        <img src="assets/back.png" @click="toMenu()" style="width: 45px; height: 45px; position: absolute; bottom: 8px; left: 8px; cursor: pointer">
+        <img src="assets/reload.png" @click="reload()" style="width: 45px; height: 45px; position: absolute; bottom: 8px; left: 62px; cursor: pointer">
+      </div>
+    </main>
+    <script>
+      const App = {
+        data() {
+          return {
+            pause: false,
+            filePath: "",
+            fileName: "",
+            thisURL: "",
+            t1: "",
+            t2: "",
+            anchor: ""
+          };
+        },
+        methods: {
+          pause_or_play(){
+            if (this.pause) {
+              var ele = document.documentElement;
+              ele.requestFullscreen();
+              document.getElementById("video").play()
+              this.pause = false
+            } else {
+              document.getElementById("video").pause()
+              this.pause = true
+            }
+          },
+          getParam(name, url) {
+            if (!url) url = window.location.href;
+            name = name.replace(/[\[\]]/g, "\\$&");
+            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, " "));
+          },
+          toMenu(){
+            window.location.href = "/?anchor=" + this.anchor
+          },
+          reload(){
+            window.location.href = this.thisURL
+          }
+        },
+        created() {
+          this.fileName = this.getParam("fileName");
+          this.t1 = this.getParam("t1");
+          this.t2 = this.getParam("t2");
+          this.anchor = this.getParam("anchor");
+          this.filePath = 'movies/' + this.fileName + "#t=" + this.t1 + "," + this.t2
+          this.thisURL =
+               "/play.html?fileName=" + this.fileName
+             + "&t1=" + this.t1
+             + "&t2=" + this.t2
+             + "&anchor=" + this.anchor;
+        },
+        mounted() {
+          this.pause_or_play();
+        }
+      }
+      Vue.createApp(App).mount('#app')
+    </script>
+  </body>
+</html>
