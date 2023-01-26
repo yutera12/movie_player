@@ -10,7 +10,9 @@ def scale_to_width(img, width):
     return dst
 
 def main():
-    with open('info.json', 'r', encoding='utf-8') as f:
+    if not os.path.exists("images/thumbnails"):
+        os.makedirs("images/thumbnails")
+    with open('images/info.json', 'r', encoding='utf-8') as f:
         info = json.load(f)
     for data in info:
         for dt in data['data']:
@@ -18,13 +20,13 @@ def main():
             thumbnail = dt['thumbnailTime']
             thumbnail = thumbnail[0] * 60 + thumbnail[1]
             filename = f'{movie}__{thumbnail}'
-            if not os.path.exists(f'thumbnails/{filename}.png'):
-                video = cv2.VideoCapture(f'movies/{movie}')
+            if not os.path.exists(f'images/thumbnails/{filename}.png'):
+                video = cv2.VideoCapture(f'images/movies/{movie}')
                 video.set(cv2.CAP_PROP_POS_MSEC, thumbnail * 1000)
                 _, img = video.read()
                 img = scale_to_width(img, 400)
-                cv2.imwrite('thumbnails/temp.png', img)
-                shutil.move('thumbnails/temp.png', f'thumbnails/{filename}.png')
+                cv2.imwrite('images/thumbnails/temp.png', img)
+                shutil.move('images/thumbnails/temp.png', f'images/thumbnails/{filename}.png')
 
 if __name__ == '__main__':
     main()
