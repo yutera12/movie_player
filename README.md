@@ -1,8 +1,28 @@
+# コンポーネントの構成
+
+```
+App
+|--Home
+|  |--Nav
+|  |  |--Table
+|  |
+|  |--Thumb
+|
+|--Play
+|--View
+```
+
+* 思想
+  * `Home`で設定ファイルを読み込み
+  * どの月を選択したか: `Table` -> `Nav` -> `Home` -> `App` -> `Home` -> `Thumb`
+  * どの動画を再生するか: `Thumb` -> id -> `Home` -> info, id -> `App` -> info, id -> `Play`
+
 # 環境構築手順
 
-## サムネイルの作成
+## 設定ファイルとサムネイルの作成
 
 * `cd movie_player`
+* `python makeInfo.py`
 * `python makeThumb.py`
 
 ## 開発用サーバの起動
