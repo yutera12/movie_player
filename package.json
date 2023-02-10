@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "axios": "^1.2.4",
-    "bootstrap": "^5.2.3",
+    "reset-css": "^5.0.1",
     "vue": "^3.2.45"
   },
   "devDependencies": {
