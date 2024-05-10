@@ -12,13 +12,6 @@
     const month = yyyymm - year * 100
     return String(year) + "年" + String(month) + "月"
   }
-  const parse_yyyymmdd = (yyyymmdd: number) => {
-    const yyyymm = Math.floor(yyyymmdd / 100)
-    const year = Math.floor(yyyymmdd / 10000)
-    const month = Math.floor((yyyymmdd - year * 10000) / 100)
-    const day = yyyymmdd - year * 10000 - month * 100
-    return {yyyymm, year, month, day}
-  }
 
   const yyyymmdd2pos = (yyyymmdd:number, yearList:number[], monthList:number[][]) => {
     /*
@@ -60,30 +53,17 @@
     return -1
   }
 
-  // min, sec -> sec
-  const ms2s = (time: number[]) => {
-    return time[0] * 60 + time[1]
-  }
-
-  // 動画の長さを返す
-  const retTotalTime = (totalTime:number) => {
-    if(totalTime > 59.5){
-      const m = Math.floor(Math.round(totalTime) / 60)
-      const s = Math.round(totalTime - m * 60)
-      return m + "分" + s + "秒"
-    } else {
-      return Math.round(totalTime) + "秒"
-    }
-  }
-
   //////////////////////////
-  // info_*.jsonの読み込み //
+  // info.jsonの読み込み //
   //////////////////////////
   type ShortData = {
     fileName: string;
     totalTime: number;
-    date: number;
+    totalTimeThumb: string;
+    yyyymm: number;
+    date: string;
     aspectRatio: number;
+    thumbnailFile: string;
   }[]
   let shortData:ShortData = []
 
@@ -95,9 +75,9 @@
   type LongData = {
     fileName: string[];
     totalTime: number[];
+    totalTimeThumb: string;
     date: string;
     thumbnailFile: string;
-    thumbnailTime: number[];
     aspectRatio: number;
   }[]
   let longData:LongData = []
@@ -110,7 +90,9 @@
 
   type PhotoData = {
     fileName: string;
-    date: number;
+    thumbnailFile: string;
+    date: string;
+    yyyymm: number;
     aspectRatio: number;
   }[]
   let photoData:PhotoData = []
@@ -120,15 +102,13 @@
     short: ShortData,
     long: LongData,
     photo: PhotoData,
-    thumb: InfoThumbData
   }
-  let data:Data = {"birth": [], "short": [], "long": [], "photo": [], "thumb": {}}
+  let data:Data = {"birth": [], "short": [], "long": [], "photo": []}
 
   await axios.get("images/info.json").then(function(response) {
     data = response.data
   })
   shortData = data["short"]
-  infoThumbData = data["thumb"]
   longData = data["long"]
   birthData = data["birth"]
   photoData = data["photo"]
@@ -144,12 +124,10 @@
   let monthList:number[][] = [[]]
   let yearMonthList:number[] = []
   shortData.forEach(function(d, i){
-    const {year, month, day, yyyymm, ..._} = parse_yyyymmdd(d.date)
-    yearMonthList.push(yyyymm)
+    yearMonthList.push(d.yyyymm)
   })
   photoData.forEach(function(d, i){
-    const {year, month, day, yyyymm, ..._} = parse_yyyymmdd(d.date)
-    yearMonthList.push(yyyymm)
+    yearMonthList.push(d.yyyymm)
   })
   yearMonthList = Array.from(new Set(yearMonthList)).sort()
   for (const yyyymm of yearMonthList){
@@ -223,31 +201,24 @@
   // short
   shortData.forEach(function(d, i){
 
-    const {year, month, day, yyyymm, ..._} = parse_yyyymmdd(d.date)
-
     // infoThumbMovie作成 //
-    const fileNameWOext = d.fileName.split('.').slice(0, -1).join('.')
-    infoThumbMovie[yyyymm].push(
+    infoThumbMovie[d.yyyymm].push(
       {
-        fileName: 'images/thumbnails/'
-                + fileNameWOext
-                + '__'
-                + ms2s(infoThumbData[d.fileName]) +'.png',
+        fileName: d.thumbnailFile,
         id: id_movie,
-        totalTime: retTotalTime(d.totalTime),
-        date: year + "年" + month + "月" + day + "日",
+        totalTime: d.totalTimeThumb,
+        date: d.date,
         aspectRatio: d.aspectRatio
       }
     )
     // infoPlayMovie作成 //
-    infoPlayMovie[yyyymm].push(
+    infoPlayMovie[d.yyyymm].push(
       {
-        fileName: ["images/images/" + d.fileName],
+        fileName: [d.fileName],
         totalTime: [d.totalTime],
         id: id_movie
       }
     )
-
     id_movie += 1
   })
 
@@ -256,9 +227,9 @@
     const yyyymm = 0
     infoThumbMovie[yyyymm].push(
       {
-        fileName: 'images/thumbnails/' + d.thumbnailFile.split('.').slice(0, -1).join('.') + '__' + ms2s(d.thumbnailTime) +'.png',
+        fileName: d.thumbnailFile,
         id: id_movie,
-        totalTime: retTotalTime(d.totalTime.reduce(function(sum, element){return sum + element;}, 0)),
+        totalTime: d.totalTimeThumb,
         date: d.date,
         aspectRatio: d.aspectRatio
       }
@@ -266,7 +237,7 @@
 
     const f:string[] = []
     d.fileName.forEach(function(d, i){
-      f.push("images/images/" + d)
+      f.push(d)
     })
     infoPlayMovie[0].push(
       {
@@ -280,28 +251,27 @@
   })
 
   photoData.forEach(function(d, i){
-    const {year, month, day, yyyymm, ..._} = parse_yyyymmdd(d.date)
 
     // infoThumbPhoto作成 //
-    infoThumbPhoto[yyyymm].push(
+    infoThumbPhoto[d.yyyymm].push(
       {
-        fileName: "images/thumbnails/" + d.fileName,
+        fileName: d.thumbnailFile,
         id: id_photo,
-        date: year + "年" + month + "月" + day + "日",
+        date: d.date,
         aspectRatio: d.aspectRatio
       }
     )
 
     // infoPlayPhoto作成 //
-    infoPlayPhoto[yyyymm].push({
-      fileName: "images/images/" + d.fileName,
-      date: year + "/" + month + "/" + day,
+    infoPlayPhoto[d.yyyymm].push({
+      fileName: d.fileName,
+      date: d.date,
       id: id_photo
     })
 
     infoPlayPhoto[0].push({
-      fileName: "images/images/" + d.fileName,
-      date: year + "/" + month + "/" + day,
+      fileName: d.fileName,
+      date: d.date,
       id: id_photo
     })
 
