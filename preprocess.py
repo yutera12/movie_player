@@ -72,7 +72,7 @@ def create_thumbnail(time, thumbFileName, orgFileName):
 
 def totalTimeThumb(time):
     if time > 59.5:
-        m = np.floor(np.round(time) / 60)
+        m = int(np.floor(np.round(time) / 60))
         s = np.round(time - m * 60)
         return f'{m}分{s}秒'
     return f'{np.round(time)}秒'
@@ -228,6 +228,34 @@ def main():
             img = scale(img, 400)
             cv2.imwrite('images/thumbnails/temp.png', img)
             shutil.move('images/thumbnails/temp.png', f'images/thumbnails/{filename}')
+
+    # example
+    #  yearMonthList : [200010, 200012, 200101, 200102]
+    #  yearList : [2000, 2001]
+    #  monthList : [[10, 12], [1, 2]]
+    yearList = []
+    monthList = [[]]
+    yearMonthList = []
+    for d in info_new['short'] + info_new['photo']:
+        yearMonthList.append(d['yyyymm'])
+    yearMonthList = sorted(list(set(yearMonthList)))
+    for yyyymm in yearMonthList:
+        yearList.append(int(np.floor(yyyymm / 100)))
+    yearList = sorted(list(set(yearList)))
+    monthList = [[] for _ in yearList]
+    for yyyymm in yearMonthList:
+        year = int(np.floor(yyyymm / 100))
+        month = yyyymm - 100 * year
+        idx = yearList.index(year)
+        monthList[idx].append(month)
+    info_vue = {
+        'yearMonthList': yearMonthList,
+        'yearList' : yearList,
+        'monthList' : monthList
+    }
+    with open('images/info_vue.json', 'w', encoding='utf-8') as f:
+        json.dump(info_vue, f, ensure_ascii=False, indent=2)
+
 
 
 if __name__ == '__main__':

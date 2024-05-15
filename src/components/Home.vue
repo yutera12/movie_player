@@ -52,6 +52,25 @@
     }
     return -1
   }
+  //////////////////////////
+  // info_vue.jsonの読み込み //
+  //////////////////////////
+  //  yearMonthList : [200010, 200012, 200101, 200102]
+  //  yearList : [2000, 2001]
+  //  monthList : [[10, 12], [1, 2]]
+  type InfoVue = {
+    yearMonthList: number[],
+    yearList: number[],
+    monthList: number[][]
+  }
+  let infoVue:InfoVue = {"yearMonthList": [], "yearList": [], "monthList": [[]]}
+  await axios.get("images/info_vue.json").then(function(response) {
+    infoVue = response.data
+  })
+
+  let yearList:number[] = infoVue["yearList"]
+  let monthList = infoVue["monthList"]
+  let yearMonthList = infoVue["yearMonthList"]
 
   //////////////////////////
   // info.jsonの読み込み //
@@ -66,11 +85,6 @@
     thumbnailFile: string;
   }[]
   let shortData:ShortData = []
-
-  type InfoThumbData = {
-    [key in string]: number[] // key: ファイル名, value: サムネイルの時間 ([分, 秒])
-  }
-  let infoThumbData:InfoThumbData = {}
 
   type LongData = {
     fileName: string[];
@@ -112,38 +126,6 @@
   longData = data["long"]
   birthData = data["birth"]
   photoData = data["photo"]
-
-  ////////////////////////////////////////////
-  // yearList, monthList, yearMonthList作成 //
-  ////////////////////////////////////////////
-  //    例
-  //    yearMonthList : [200010, 200012, 200101, 200102]
-  //    yearList : [2000, 2001]
-  //    monthList : [[10, 12], [1, 2]]
-  let yearList:number[] = []
-  let monthList:number[][] = [[]]
-  let yearMonthList:number[] = []
-  shortData.forEach(function(d, i){
-    yearMonthList.push(d.yyyymm)
-  })
-  photoData.forEach(function(d, i){
-    yearMonthList.push(d.yyyymm)
-  })
-  yearMonthList = Array.from(new Set(yearMonthList)).sort()
-  for (const yyyymm of yearMonthList){
-    yearList.push(Math.floor(yyyymm / 100))
-  }
-  yearList = Array.from(new Set(yearList)).sort()
-
-  for (let i = 0; i < yearList.length - 1; i++){
-    monthList.push([])
-  }
-  for (const yyyymm of yearMonthList){
-    const year = Math.floor(yyyymm / 100)
-    const month = yyyymm - 100 * year
-    const idx = yearList.indexOf(year)
-    monthList[idx].push(month)
-  }
 
   ///////////////////////////////////////////////////////////////
   // 動画・写真の再生＆サムネイル表示に必要な情報を格納する箱の定義 //
@@ -235,13 +217,9 @@
       }
     )
 
-    const f:string[] = []
-    d.fileName.forEach(function(d, i){
-      f.push(d)
-    })
     infoPlayMovie[0].push(
       {
-        fileName: f,
+        fileName: d.fileName,
         totalTime: d.totalTime,
         id: id_movie
       }
