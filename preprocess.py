@@ -75,7 +75,7 @@ def totalTimeThumb(time):
         m = int(np.floor(np.round(time) / 60))
         s = np.round(time - m * 60)
         return f'{m}分{s}秒'
-    return f'{np.round(time)}秒'
+    return f'{int(np.round(time))}秒'
 
 
 def yyyymmdd2pos(yyyymmdd, yearList, monthList):
@@ -114,30 +114,42 @@ def yyyymmdd2pos(yyyymmdd, yearList, monthList):
 
 
 def main():
-    ###################
-    # info.jsonの作成 #
-    ###################
-    info_new = {}  # info.jsonの元
 
-    # 古いinfo.jsonの読み込み
-    if os.path.isfile('images/info.json'):
-        with open('images/info.json', 'r', encoding='utf-8') as f:
+    if not os.path.exists('images/thumbnails'):
+        os.makedirs('images/thumbnails')
+
+    ####################################
+    # info_image.json、サムネイルの作成 #
+    ####################################
+    info_image = {}  # info_image.jsonの元
+
+    # 古いinfo_image.jsonの読み込み
+    if os.path.isfile('images/info_image.json'):
+        with open('images/info_image.json', 'r', encoding='utf-8') as f:
             info_old = json.load(f)
     else:
-        info_old = {'birth': [], 'short': [], 'long': [], 'photo': []}
+        info_old = {'short': [], 'long': [], 'photo': []}
 
     # thumb
     with open('images/info_thumb.json', 'r', encoding='utf-8') as f:
         info_thumb = json.load(f)
 
     # photo (処理に時間がかかるので、info_oldに存在する情報は流用)
-    info_new['photo'] = []
+    info_image['photo'] = []
     preproccedPhotoFiles = [f['fileName'] for f in info_old['photo']]
     photoFiles, _ = selectFiles(os.listdir('images/images'))
     for filename in tqdm(photoFiles):
-        if filename in preproccedPhotoFiles:
-            idx = preproccedPhotoFiles.index(filename)
-            info_new['photo'].append(info_old['photo'][idx])
+
+        # サムネイル作成
+        if not os.path.exists(f'images/thumbnails/{filename}'):
+            img = cv2.imread(f'images/images/{filename}')
+            img = scale(img, 400)
+            cv2.imwrite('images/thumbnails/temp.png', img)
+            shutil.move('images/thumbnails/temp.png', f'images/thumbnails/{filename}')
+
+        if f'images/images/{filename}' in preproccedPhotoFiles:
+            idx = preproccedPhotoFiles.index(f'images/images/{filename}')
+            info_image['photo'].append(info_old['photo'][idx])
         else:
             im = cv2.imread(f'images/images/{filename}')
             row = im.shape[0]
@@ -145,7 +157,7 @@ def main():
             aspectRatio = col / row
             year, month, day, yyyymm = extractDataFromFilename(filename)
             assert not year is None
-            info_new['photo'].append({
+            info_image['photo'].append({
                 'fileName': f'images/images/{filename}',
                 'thumbnailFile': f'images/thumbnails/{filename}',
                 'date': f'{year}年{month}月{day}日',
@@ -154,15 +166,22 @@ def main():
             })
     # short
     # 処理に時間がかかるので、info_oldに存在する情報は流用する
-    info_new['short'] = []
+    info_image['short'] = []
     preproccedShortMovieFiles = [f['fileName'] for f in info_old['short']]
     _, movieFiles = selectFiles(os.listdir('images/images'))
     errFiles = []
     for filename in tqdm(movieFiles):
         filenameWOext = os.path.splitext(os.path.basename(filename))[0]
-        if filename in preproccedShortMovieFiles:
-            idx = preproccedShortMovieFiles.index(filename)
-            info_new['short'].append(info_old['short'][idx])
+
+        # サムネイル作成
+        dt = info_thumb[filename]
+        time = dt[0] * 60 + dt[1]
+        thumbFileName = f'{filenameWOext}__{time}.png'
+        create_thumbnail(time, thumbFileName, filename)
+
+        if f'images/images/{filename}' in preproccedShortMovieFiles:
+            idx = preproccedShortMovieFiles.index(f'images/images/{filename}')
+            info_image['short'].append(info_old['short'][idx])
         else:
             cmd = f'ffprobe images/images/{filename} -hide_banner -show_entries format=duration'
             r = subprocess.run(cmd, stdout=subprocess.PIPE)
@@ -177,7 +196,7 @@ def main():
             if year is None:
                 errFiles.append(filename)
             else:
-                info_new['short'].append({
+                info_image['short'].append({
                     'fileName': f'images/images/{filename}',
                     'totalTime': totalTime,
                     'totalTimeThumb': totalTimeThumb(totalTime),
@@ -187,18 +206,27 @@ def main():
                     'thumbnailFile': f'images/thumbnails/{filenameWOext}__'
                       + str(ms2s(info_thumb[filename])) +'.png'
                 })
+    if len(errFiles) > 0:
+        print(f'{errFiles}はshort動画に含まれません')
 
     # long
     # 処理に時間がかかるので、info_oldに存在する情報は流用する
     with open('images/info_long.json', 'r', encoding='utf-8') as f:
         info_long = json.load(f)
-    info_new['long'] = []
+    info_image['long'] = []
     preproccedLongMovieFiles = [f['fileName'] for f in info_old['long']]
     for dt in tqdm(info_long):
         fileNames = dt['fileName']
-        if fileNames in preproccedLongMovieFiles:
-            idx = preproccedLongMovieFiles.index(fileNames)
-            info_new['long'].append(info_old['long'][idx])
+
+        # サムネイル作成
+        f_noExt, _ = os.path.splitext(dt['thumbnailFile'])
+        time = dt['thumbnailTime'][0] * 60 + dt['thumbnailTime'][1]
+        thumbFileName = f'{f_noExt}__{time}.png'
+        create_thumbnail(time, thumbFileName, dt['thumbnailFile'])
+
+        if [f'images/images/{f}' for f in fileNames] in preproccedLongMovieFiles:
+            idx = preproccedLongMovieFiles.index([f'images/images/{f}' for f in fileNames])
+            info_image['long'].append(info_old['long'][idx])
         else:
             times = []
             for f in fileNames:
@@ -215,7 +243,7 @@ def main():
 
             filenameWOext = os.path.splitext(os.path.basename(dt['thumbnailFile']))[0]
 
-            info_new['long'].append(
+            info_image['long'].append(
                 {'fileName': ['images/images/' + f for f in dt['fileName']],
                  'date': dt['date'],
                  'thumbnailFile': f'images/thumbnails/{filenameWOext}__' + str(ms2s(dt['thumbnailTime'])) +'.png',
@@ -224,41 +252,14 @@ def main():
                  'aspectRatio': aspectRatio})
 
     # dump
-    with open('images/info.json', 'w', encoding='utf-8') as f:
-        json.dump(info_new, f, ensure_ascii=False, indent=2)
+    with open('images/info_image.json', 'w', encoding='utf-8') as f:
+        json.dump(info_image, f, ensure_ascii=False, indent=2)
 
-    print(errFiles)
 
-    ###################
-    # サムネイルの作成 #
-    ###################
-    if not os.path.exists('images/thumbnails'):
-        os.makedirs('images/thumbnails')
-
-    with open('images/info_thumb.json', 'r', encoding='utf-8') as f:
-        info_thumb = json.load(f)
-    for orgFileName, dt in info_thumb.items():
-        f_noExt, _ = os.path.splitext(orgFileName)
-        time = dt[0] * 60 + dt[1]
-        thumbFileName = f'{f_noExt}__{time}.png'
-        create_thumbnail(time, thumbFileName, orgFileName)
-
-    with open('images/info_long.json', 'r', encoding='utf-8') as f:
-        info_long = json.load(f)
-    for dt in info_long:
-        orgFileName = dt['thumbnailFile']
-        f_noExt, _ = os.path.splitext(orgFileName)
-        time = dt['thumbnailTime'][0] * 60 + dt['thumbnailTime'][1]
-        thumbFileName = f'{f_noExt}__{time}.png'
-        create_thumbnail(time, thumbFileName, orgFileName)
-
-    photoFiles, _ = selectFiles(os.listdir('images/images'))
-    for filename in tqdm(photoFiles):
-        if not os.path.exists(f'images/thumbnails/{filename}'):
-            img = cv2.imread(f'images/images/{filename}')
-            img = scale(img, 400)
-            cv2.imwrite('images/thumbnails/temp.png', img)
-            shutil.move('images/thumbnails/temp.png', f'images/thumbnails/{filename}')
+    #####################
+    # info_vue.json作成 #
+    #####################
+    info_vue = {}
 
     # example
     #  yearMonthList : [200010, 200012, 200101, 200102]
@@ -267,7 +268,7 @@ def main():
     yearList = []
     monthList = [[]]
     yearMonthList = []
-    for d in info_new['short'] + info_new['photo']:
+    for d in info_image['short'] + info_image['photo']:
         yearMonthList.append(d['yyyymm'])
     yearMonthList = sorted(list(set(yearMonthList)))
     for yyyymm in yearMonthList:
@@ -279,11 +280,15 @@ def main():
         month = yyyymm - 100 * year
         idx = yearList.index(year)
         monthList[idx].append(month)
+    info_vue['yearMonthList'] = yearMonthList
+    info_vue['yearList'] = yearList
+    info_vue['monthList'] = monthList
 
     # birth
     with open('images/info_birth.json', 'r', encoding='utf-8') as f:
         birthInfo = json.load(f)
     birthText = {}
+  
     for yyyymm in yearMonthList:
         year = int(np.floor(yyyymm / 100))
         month = yyyymm - year * 100
@@ -310,6 +315,7 @@ def main():
                 txt += f"{name}：{ageY1}歳{ageM1}ヵ月"
                 txt += f"～{ageY2}歳{ageM2}ヵ月、"
             birthText[yyyymm] = txt[:-1]
+    info_vue['birthText'] = birthText
 
 
     infoGant = []
@@ -329,34 +335,32 @@ def main():
                 continue
             info[f'{d["name"]} {age}歳'] = [x1_pos, x2_pos]
         infoGant.append({'name': d["name"], 'gant': info})
+    info_vue['gant'] = infoGant
 
     yyyymm2pos = {}
     for yyyymm in [0] + yearMonthList:
         yyyymm2pos[yyyymm * 100] = yyyymmdd2pos(yyyymm * 100, yearList, monthList)
+    info_vue['yyyymm2pos'] = yyyymm2pos
 
     yyyymm2text = {}
     for yyyymm in yearMonthList:
         year = int(np.floor(yyyymm / 100))
         month = yyyymm - year * 100
         yyyymm2text[yyyymm] = f'{year}年{month}月'
+    info_vue['yyyymm2text'] = yyyymm2text
 
     infoPlayPhoto = {}
     infoThumbPhoto = {}
     infoPlayMovie = {}
     infoThumbMovie = {}
-    infoPlayPhoto[0] = []
-    infoThumbPhoto[0] = []
-    infoPlayMovie[0] = []
-    infoThumbMovie[0] = []
-
-    for yyyymm in yearMonthList:
+    for yyyymm in [0] + yearMonthList:
         infoPlayPhoto[yyyymm] = []
         infoThumbPhoto[yyyymm] = []
         infoPlayMovie[yyyymm] = []
         infoThumbMovie[yyyymm] = []
 
     id_photo = 0
-    for d in info_new['photo']:
+    for d in info_image['photo']:
         infoThumbPhoto[d['yyyymm']].append(
             {
               'fileName': d['thumbnailFile'],
@@ -365,7 +369,6 @@ def main():
               'aspectRatio': d['aspectRatio']
             }
         )
-
         infoPlayPhoto[d['yyyymm']].append(
             {
                 'fileName': d['fileName'],
@@ -373,7 +376,6 @@ def main():
                 'id': id_photo
             }
         )
-
         infoPlayPhoto[0].append(
             {
                 'fileName': d['fileName'],
@@ -385,11 +387,8 @@ def main():
 
 
     id_movie = 0
-
     # short
-    for d in info_new['short']:
-
-        # infoThumbMovie作成
+    for d in info_image['short']:
         infoThumbMovie[d['yyyymm']].append(
           {
             'fileName': d['thumbnailFile'],
@@ -408,9 +407,8 @@ def main():
           }
         )
         id_movie += 1
-
     # long
-    for d in info_new['long']:
+    for d in info_image['long']:
         infoThumbMovie[0].append(
           {
             'fileName': d['thumbnailFile'],
@@ -420,7 +418,6 @@ def main():
             'aspectRatio': d['aspectRatio']
           }
         )
-
         infoPlayMovie[0].append(
           {
             'fileName': d['fileName'],
@@ -428,27 +425,14 @@ def main():
             'id': id_movie
           }
         )
-
         id_movie += 1
 
-    info_vue = {
-        'yearMonthList': yearMonthList,
-        'yearList' : yearList,
-        'monthList': monthList,
-        'birthText': birthText,
-        'infoGant': infoGant,
-        'yyyymm2pos': yyyymm2pos,
-        'yyyymm2text': yyyymm2text,
-        'infoPlayPhoto': infoPlayPhoto,
-        'infoThumbPhoto': infoThumbPhoto,
-        'infoPlayMovie': infoPlayMovie,
-        'infoThumbMovie': infoThumbMovie,
-    }
+    info_vue['playPhoto'] = infoPlayPhoto
+    info_vue['thumbPhoto'] = infoThumbPhoto
+    info_vue['playMovie'] = infoPlayMovie
+    info_vue['thumbMovie'] = infoThumbMovie
     with open('images/info_vue.json', 'w', encoding='utf-8') as f:
         json.dump(info_vue, f, ensure_ascii=False, indent=2)
-
-
-
 
 
 if __name__ == '__main__':

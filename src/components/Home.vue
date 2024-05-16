@@ -12,23 +12,20 @@
     yearList: number[],
     monthList: number[][]
     birthText: {[key in number]: string}
-    infoGant: {"name": string; "gant": {[key in string]: number[]}}[]
+    gant: {"name": string; "gant": {[key in string]: number[]}}[]
     yyyymm2pos: {[key in number]: number}
     yyyymm2text: {[key in number]: string}
-    infoThumbPhoto: {[key in number]: {fileName: string; id: number; date: string; aspectRatio: number;}[]}
-    infoPlayPhoto: {[key in number]:{fileName: string; date: string; id: number;}[]}
-    infoPlayMovie: {[key in number]: {totalTime: number[]; fileName: string[]; id: number;}[]}
-    infoThumbMovie: {[key in number]: {fileName: string; id: number; totalTime: string; date: string; aspectRatio: number;}[]}
+    thumbPhoto: {[key in number]: {fileName: string; id: number; date: string; aspectRatio: number;}[]}
+    playPhoto: {[key in number]:{fileName: string; date: string; id: number;}[]}
+    playMovie: {[key in number]: {totalTime: number[]; fileName: string[]; id: number;}[]}
+    thumbMovie: {[key in number]: {fileName: string; id: number; totalTime: string; date: string; aspectRatio: number;}[]}
   }
   let infoVue:InfoVue = {"yearMonthList": [], "yearList": [], "monthList": [[]],
-  "birthText": {0: ""}, "infoGant":[], "yyyymm2pos":{}, "yyyymm2text":{}, "infoThumbPhoto": {}, "infoPlayPhoto": {},
-  "infoPlayMovie": {}, "infoThumbMovie": {}}
+  "birthText": {0: ""}, "gant":[], "yyyymm2pos":{}, "yyyymm2text":{}, "thumbPhoto": {}, "playPhoto": {},
+  "playMovie": {}, "thumbMovie": {}}
   await axios.get("images/info_vue.json").then(function(response) {
     infoVue = response.data
   })
-  const yyyymm2pos:{[key in number]: number} = infoVue["yyyymm2pos"]
-  const birthText = infoVue["birthText"]
-  const infoGant = infoVue["infoGant"]
 
   // App.vueから情報を受けとり
   const props = defineProps<{
@@ -39,9 +36,9 @@
   const emit = defineEmits(['go-to-play-movie', 'go-to-play-photo', 'change-yyyymm'])
   const goToPlay = (id: number, isMovie:boolean) => { // 何番目のサムネイルをクリックしたかを受け取る
     if (isMovie){
-      emit('go-to-play-movie', infoVue["infoPlayMovie"][props.selectedYYYYMM], id, props.selectedYYYYMM === 0)
+      emit('go-to-play-movie', infoVue["playMovie"][props.selectedYYYYMM], id, props.selectedYYYYMM === 0)
     } else {
-      emit('go-to-play-photo', infoVue["infoPlayPhoto"][props.selectedYYYYMM], id)
+      emit('go-to-play-photo', infoVue["playPhoto"][props.selectedYYYYMM], id)
     }
   }
   const changeYYYYMM = (yyyymm: number) => {  // 何年何月が選択されたかを受け取る
@@ -52,7 +49,7 @@
   const cellWidth = 40
   const allWidth = 60
   onMounted(() => {
-    const pos = yyyymm2pos[props.selectedYYYYMM]
+    const pos = infoVue["yyyymm2pos"][props.selectedYYYYMM]
     let scrollLeft = 0
     if (pos !== -1){
       scrollLeft = allWidth + cellWidth * (pos - 4)
@@ -76,7 +73,7 @@
 
 <template>
   <!-- 上部のメニューバー -->
-  <Nav :infoGant="infoGant"
+  <Nav :infoGant="infoVue['gant']"
        :yearList="infoVue['yearList']"
        :monthList="infoVue['monthList']"
        :selectedYYYYMM="selectedYYYYMM"
@@ -92,15 +89,15 @@
       {{infoVue['yyyymm2text'][selectedYYYYMM]}}
     </span>
     <span class="birth-info">
-      {{ birthText[selectedYYYYMM] }}
+      {{ infoVue["birthText"][selectedYYYYMM] }}
     </span>
   </h1>
   <h1 v-else class="title">
     <span class="text">まとめ</span>
   </h1>
   <!-- サムネイル -->
-  <Thumb :infoThumbMovie="infoVue['infoThumbMovie'][selectedYYYYMM]"
-         :infoThumbPhoto="infoVue['infoThumbPhoto'][selectedYYYYMM]"
+  <Thumb :infoThumbMovie="infoVue['thumbMovie'][selectedYYYYMM]"
+         :infoThumbPhoto="infoVue['thumbPhoto'][selectedYYYYMM]"
          :selectedYYYYMM="selectedYYYYMM"
          @go-to-play="goToPlay"
          id="thumb"/>
