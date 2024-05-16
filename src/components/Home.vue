@@ -13,45 +13,6 @@
     return String(year) + "年" + String(month) + "月"
   }
 
-  const yyyymmdd2pos = (yyyymmdd:number, yearList:number[], monthList:number[][]) => {
-    /*
-    yyyymmddを入力すると、home画面上部の月のリストのどの位置に相当するかを返す
-
-    例
-    yearList : [2020, 2021]
-    monthList : [[10, 12], [1, 2]]
-
-    yyyymmdd | return
-    -------- | -----
-    0        | -1     # 0が入力されたら-1を返す
-    20200910 | 0      # 2020/09/10は2000/10の箱（一つ目の箱）よりも前なので0
-    20201010 | 0.333  # 2020/10/10は2000/10の箱の中の1/3の位置に相当するので、1/3
-    20201110 | 1      # 2020/11/10は2000/10の箱と2020/12の箱の間に相当するので1
-    20201210 | 1.333
-    20210110 | 2.333
-    20210210 | 3.333
-    20210310 | -1     # 2021/03/10は最後の箱(2021/2の箱)の外側に相当するので-1
-    */
-    if (yyyymmdd === 0){
-      return -1
-    }
-    const yyyymm = Math.floor(yyyymmdd / 100)
-    const dd = yyyymmdd - yyyymm * 100
-    let pos = 0
-    for (let i = 0; i < yearList.length; i++) {
-      const year = yearList[i]
-      for (let j = 0; j < monthList[i].length; j++){
-        const month = monthList[i][j]
-        if (year * 100 + month === yyyymm){
-          return pos + dd / 30
-        } else if (year * 100 + month > yyyymm) {
-          return pos
-        }
-        pos += 1
-      }
-    }
-    return -1
-  }
   //////////////////////////
   // info_vue.jsonの読み込み //
   //////////////////////////
@@ -63,12 +24,15 @@
     yearList: number[],
     monthList: number[][]
     birthText: {[key in number]: string}  // keyはyyyymm, valueは生後の期間情報
+    infoGant: {"name": string; "gant": {[key in string]: number[]}}[]
+    yyyymm2pos: {[key in number]: number}
   }
-  let infoVue:InfoVue = {"yearMonthList": [], "yearList": [], "monthList": [[]], "birthText": {0: ""}}
+  let infoVue:InfoVue = {"yearMonthList": [], "yearList": [], "monthList": [[]], "birthText": {0: ""}, "infoGant":[], "yyyymm2pos":{}}
   await axios.get("images/info_vue.json").then(function(response) {
     infoVue = response.data
   })
 
+  const yyyymm2pos:{[key in number]: number} = infoVue["yyyymm2pos"]
   let yearList:number[] = infoVue["yearList"]
   let monthList = infoVue["monthList"]
   let yearMonthList = infoVue["yearMonthList"]
@@ -269,28 +233,7 @@
     "name": string;
     "gant": {[key in string]: number[]}
   }[]
-  const infoGant:InfoGant = []
-  birthData.forEach( function(v){
-    const birthday = v.date
-    const info:{[key in string]: number[]} = {}
-    let age = -1
-    while ( true ) {
-      age += 1
-      const x1 = birthday + 10000 * age
-      const x2 = birthday + 10000 * (age + 1)
-      if (x1 > yearList.slice(-1)[0] * 10000 + monthList.slice(-1)[0].slice(-1)[0] * 100){
-        break
-      }
-      const x1_pos = yyyymmdd2pos(x1, yearList, monthList)
-      const x2_pos = yyyymmdd2pos(x2, yearList, monthList)
-      if (x1_pos === 0 && x2_pos === 0){
-        continue
-      }
-      info[`${v.name} ${age}歳`] = [x1_pos, x2_pos]
-    }
-    infoGant.push({name: v.name, gant: info})
-  })
-
+  const infoGant = infoVue["infoGant"]
   // App.vueから情報を受けとり
   const props = defineProps<{
     selectedYYYYMM: number
@@ -313,7 +256,7 @@
   const cellWidth = 40
   const allWidth = 60
   onMounted(() => {
-    const pos = yyyymmdd2pos(props.selectedYYYYMM * 100, yearList, monthList)
+    const pos = yyyymm2pos[props.selectedYYYYMM]
     let scrollLeft = 0
     if (pos !== -1){
       scrollLeft = allWidth + cellWidth * (pos - 4)

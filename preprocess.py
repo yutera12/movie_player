@@ -78,6 +78,41 @@ def totalTimeThumb(time):
     return f'{np.round(time)}秒'
 
 
+def yyyymmdd2pos(yyyymmdd, yearList, monthList):
+    '''
+    yyyymmddを入力すると、home画面上部の月のリストのどの位置に相当するかを返す
+
+    例
+    yearList : [2020, 2021]
+    monthList : [[10, 12], [1, 2]]
+
+    yyyymmdd | return
+    -------- | -----
+    0        | -1     # 0が入力されたら-1を返す
+    20200910 | 0      # 2020/09/10は2000/10の箱（一つ目の箱）よりも前なので0
+    20201010 | 0.333  # 2020/10/10は2000/10の箱の中の1/3の位置に相当するので、1/3
+    20201110 | 1      # 2020/11/10は2000/10の箱と2020/12の箱の間に相当するので1
+    20201210 | 1.333
+    20210110 | 2.333
+    20210210 | 3.333
+    20210310 | -1     # 2021/03/10は最後の箱(2021/2の箱)の外側に相当するので-1
+    */
+    '''
+    if yyyymmdd == 0:
+        return -1
+    yyyymm = int(np.floor(yyyymmdd / 100))
+    dd = yyyymmdd - yyyymm * 100
+    pos = 0
+    for year, month_li in zip(yearList, monthList):
+        for month in month_li:
+            if year * 100 + month == yyyymm:
+                return pos + dd / 30
+            elif year * 100 + month > yyyymm:
+                return pos
+            pos += 1
+    return -1
+
+
 def main():
     ###################
     # info.jsonの作成 #
@@ -276,11 +311,37 @@ def main():
                 txt += f"{name}：{ageY1}歳{ageM1}ヵ月"
                 txt += f"～{ageY2}歳{ageM2}ヵ月、"
             birthText[yyyymm] = txt[:-1]
+
+
+    infoGant = []
+    for d in info_new['birth']:
+        birthday = d['date']
+        info = {}
+        age = -1
+        while True:
+            age += 1
+            x1 = birthday + 10000 * age
+            x2 = birthday + 10000 * (age + 1)
+            if x1 > yearList[-1] * 10000 + monthList[-1][-1] * 100:
+                break
+            x1_pos = yyyymmdd2pos(x1, yearList, monthList)
+            x2_pos = yyyymmdd2pos(x2, yearList, monthList)
+            if (x1_pos == 0) & (x2_pos == 0):
+                continue
+            info[f'{d["name"]} {age}歳'] = [x1_pos, x2_pos]
+        infoGant.append({'name': d["name"], 'gant': info})
+
+    yyyymm2pos = {}
+    for yyyymm in [0] + yearMonthList:
+        yyyymm2pos[yyyymm * 100] = yyyymmdd2pos(yyyymm * 100, yearList, monthList)
+
     info_vue = {
         'yearMonthList': yearMonthList,
         'yearList' : yearList,
-        'monthList' : monthList,
-        'birthText' : birthText
+        'monthList': monthList,
+        'birthText': birthText,
+        'infoGant': infoGant,
+        'yyyymm2pos': yyyymm2pos
     }
     with open('images/info_vue.json', 'w', encoding='utf-8') as f:
         json.dump(info_vue, f, ensure_ascii=False, indent=2)
