@@ -62,8 +62,9 @@
     yearMonthList: number[],
     yearList: number[],
     monthList: number[][]
+    birthText: {[key in number]: string}  // keyはyyyymm, valueは生後の期間情報
   }
-  let infoVue:InfoVue = {"yearMonthList": [], "yearList": [], "monthList": [[]]}
+  let infoVue:InfoVue = {"yearMonthList": [], "yearList": [], "monthList": [[]], "birthText": {0: ""}}
   await axios.get("images/info_vue.json").then(function(response) {
     infoVue = response.data
   })
@@ -256,45 +257,10 @@
     id_photo += 1
   })
 
-
   //////////////////////////////////////////////////////////////////
   // birthTextList(「a：0歳8ヵ月～0歳9ヵ月、b：誕生前」の表示に必要) //
   /////////////////////////////////////////////////////////////////
-  type BirthText = {
-    [key in number]: string  // keyはyyyymm, valueは生後の期間情報
-  }
-  const birthText:BirthText = {}
-  for (const yyyymm of yearMonthList){
-    const year = Math.floor(yyyymm / 100)
-    const month = yyyymm - year * 100
-    let txt = ""
-    birthData.forEach(function(d){
-      const name = d.name
-      const birthYYYYMM = Math.floor(d.date / 100)
-      const birthYYYY = Math.floor(birthYYYYMM / 100)
-      const birthMM = birthYYYYMM - birthYYYY * 100
-      const yyyymm = year * 100 + month
-      if (yyyymm < birthYYYYMM){
-        txt += name + "：誕生前、"
-      }
-      if (yyyymm === birthYYYYMM){
-        txt += name + "：誕生前～0歳0ヵ月、"
-      }
-      if (yyyymm > birthYYYYMM){
-        const yyyy = Math.floor(yyyymm / 100)
-        const mm = yyyymm - yyyy * 100
-        const diffMonth1 = (yyyy - birthYYYY) * 12 + (mm - birthMM) - 1
-        const diffMonth2 = diffMonth1 + 1
-        const ageY1 = Math.floor(diffMonth1 / 12)
-        const ageM1 = diffMonth1 - ageY1 * 12
-        const ageY2 = Math.floor(diffMonth2 / 12)
-        const ageM2 = diffMonth2 - ageY2 * 12
-        txt += name + "：" + ageY1 + "歳" + ageM1 + "ヵ月"
-        txt += "～" + ageY2 + "歳" + ageM2 + "ヵ月、"
-      }
-    })
-    birthText[yyyymm] = txt.slice(0, -1)
-  }
+  const birthText = infoVue["birthText"]
 
   //////////////////
   // infoGant作成 //

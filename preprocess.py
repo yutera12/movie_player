@@ -248,14 +248,42 @@ def main():
         month = yyyymm - 100 * year
         idx = yearList.index(year)
         monthList[idx].append(month)
+
+    birthText = {}
+    for yyyymm in yearMonthList:
+        year = int(np.floor(yyyymm / 100))
+        month = yyyymm - year * 100
+        txt = ""
+        for d in info_new['birth']:
+            name = d['name']
+            birthYYYYMM = int(np.floor(d['date'] / 100))
+            birthYYYY = int(np.floor(birthYYYYMM / 100))
+            birthMM = birthYYYYMM - birthYYYY * 100
+            yyyymm = year * 100 + month
+            if yyyymm < birthYYYYMM:
+                txt += f"{name}：誕生前、"
+            elif yyyymm == birthYYYYMM:
+                txt += f"{name}：誕生前～0歳0ヵ月、"
+            elif yyyymm > birthYYYYMM:
+                yyyy = int(np.floor(yyyymm / 100))
+                mm = yyyymm - yyyy * 100
+                diffMonth1 = (yyyy - birthYYYY) * 12 + (mm - birthMM) - 1
+                diffMonth2 = diffMonth1 + 1
+                ageY1 = int(np.floor(diffMonth1 / 12))
+                ageM1 = diffMonth1 - ageY1 * 12
+                ageY2 = int(np.floor(diffMonth2 / 12))
+                ageM2 = diffMonth2 - ageY2 * 12
+                txt += f"{name}：{ageY1}歳{ageM1}ヵ月"
+                txt += f"～{ageY2}歳{ageM2}ヵ月、"
+            birthText[yyyymm] = txt[:-1]
     info_vue = {
         'yearMonthList': yearMonthList,
         'yearList' : yearList,
-        'monthList' : monthList
+        'monthList' : monthList,
+        'birthText' : birthText
     }
     with open('images/info_vue.json', 'w', encoding='utf-8') as f:
         json.dump(info_vue, f, ensure_ascii=False, indent=2)
-
 
 
 if __name__ == '__main__':
