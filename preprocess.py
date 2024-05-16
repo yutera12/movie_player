@@ -340,13 +340,20 @@ def main():
         month = yyyymm - year * 100
         yyyymm2text[yyyymm] = f'{year}年{month}月'
 
-    infoThumbPhoto = {}
     infoPlayPhoto = {}
+    infoThumbPhoto = {}
+    infoPlayMovie = {}
+    infoThumbMovie = {}
     infoPlayPhoto[0] = []
     infoThumbPhoto[0] = []
+    infoPlayMovie[0] = []
+    infoThumbMovie[0] = []
+
     for yyyymm in yearMonthList:
         infoPlayPhoto[yyyymm] = []
         infoThumbPhoto[yyyymm] = []
+        infoPlayMovie[yyyymm] = []
+        infoThumbMovie[yyyymm] = []
 
     id_photo = 0
     for d in info_new['photo']:
@@ -376,6 +383,54 @@ def main():
         )
         id_photo += 1
 
+
+    id_movie = 0
+
+    # short
+    for d in info_new['short']:
+
+        # infoThumbMovie作成
+        infoThumbMovie[d['yyyymm']].append(
+          {
+            'fileName': d['thumbnailFile'],
+            'id': id_movie,
+            'totalTime': d['totalTimeThumb'],
+            'date': d['date'],
+            'aspectRatio': d['aspectRatio']
+          }
+        )
+        # infoPlayMovie作成 //
+        infoPlayMovie[d['yyyymm']].append(
+          {
+            'fileName': [d['fileName']],
+            'totalTime': [d['totalTime']],
+            'id': id_movie
+          }
+        )
+        id_movie += 1
+
+    # long
+    for d in info_new['long']:
+        infoThumbMovie[0].append(
+          {
+            'fileName': d['thumbnailFile'],
+            'id': id_movie,
+            'totalTime': d['totalTimeThumb'],
+            'date': d['date'],
+            'aspectRatio': d['aspectRatio']
+          }
+        )
+
+        infoPlayMovie[0].append(
+          {
+            'fileName': d['fileName'],
+            'totalTime': d['totalTime'],
+            'id': id_movie
+          }
+        )
+
+        id_movie += 1
+
     info_vue = {
         'yearMonthList': yearMonthList,
         'yearList' : yearList,
@@ -384,8 +439,10 @@ def main():
         'infoGant': infoGant,
         'yyyymm2pos': yyyymm2pos,
         'yyyymm2text': yyyymm2text,
+        'infoPlayPhoto': infoPlayPhoto,
         'infoThumbPhoto': infoThumbPhoto,
-        'infoPlayPhoto': infoPlayPhoto
+        'infoPlayMovie': infoPlayMovie,
+        'infoThumbMovie': infoThumbMovie,
     }
     with open('images/info_vue.json', 'w', encoding='utf-8') as f:
         json.dump(info_vue, f, ensure_ascii=False, indent=2)
