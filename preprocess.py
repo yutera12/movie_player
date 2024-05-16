@@ -335,13 +335,20 @@ def main():
     for yyyymm in [0] + yearMonthList:
         yyyymm2pos[yyyymm * 100] = yyyymmdd2pos(yyyymm * 100, yearList, monthList)
 
+    yyyymm2text = {}
+    for yyyymm in [0] + yearMonthList:
+        year = int(np.floor(yyyymm / 100))
+        month = yyyymm - year * 100
+        yyyymm2text[yyyymm] = f'{year}年{month}月'
+
     info_vue = {
         'yearMonthList': yearMonthList,
         'yearList' : yearList,
         'monthList': monthList,
         'birthText': birthText,
         'infoGant': infoGant,
-        'yyyymm2pos': yyyymm2pos
+        'yyyymm2pos': yyyymm2pos,
+        'yyyymm2text': yyyymm2text
     }
     with open('images/info_vue.json', 'w', encoding='utf-8') as f:
         json.dump(info_vue, f, ensure_ascii=False, indent=2)

@@ -4,15 +4,6 @@
   import Thumb from './Thumb.vue'
   import axios from 'axios'
 
-  /////////////////
-  // 各種メソッド //
-  /////////////////
-  const parse_yyyymm = (yyyymm: number) => {
-    const year = Math.floor(yyyymm / 100)
-    const month = yyyymm - year * 100
-    return String(year) + "年" + String(month) + "月"
-  }
-
   //////////////////////////
   // info_vue.jsonの読み込み //
   //////////////////////////
@@ -26,8 +17,9 @@
     birthText: {[key in number]: string}  // keyはyyyymm, valueは生後の期間情報
     infoGant: {"name": string; "gant": {[key in string]: number[]}}[]
     yyyymm2pos: {[key in number]: number}
+    yyyymm2text: {[key in number]: string}
   }
-  let infoVue:InfoVue = {"yearMonthList": [], "yearList": [], "monthList": [[]], "birthText": {0: ""}, "infoGant":[], "yyyymm2pos":{}}
+  let infoVue:InfoVue = {"yearMonthList": [], "yearList": [], "monthList": [[]], "birthText": {0: ""}, "infoGant":[], "yyyymm2pos":{}, "yyyymm2text":{}}
   await axios.get("images/info_vue.json").then(function(response) {
     infoVue = response.data
   })
@@ -293,7 +285,7 @@
   <!-- 上部見出し -->
   <h1 v-if="selectedYYYYMM != 0" class="title">
     <span class="text">
-      {{parse_yyyymm(selectedYYYYMM)}}
+      {{infoVue['yyyymm2text'][selectedYYYYMM]}}
     </span>
     <span class="birth-info">
       {{ birthText[selectedYYYYMM] }}
@@ -320,7 +312,7 @@
       </template>
 
       <span class="bottom-yyyymm">
-        {{ parse_yyyymm(selectedYYYYMM) }}
+        {{ infoVue['yyyymm2text'][selectedYYYYMM] }}
       </span>
 
       <template v-if="selectedYYYYMM !== yearList.slice(-1)[0] * 100 + monthList.slice(-1)[0].slice(-1)[0]">
