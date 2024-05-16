@@ -335,7 +335,7 @@ def main():
         yyyymm2pos[yyyymm * 100] = yyyymmdd2pos(yyyymm * 100, yearList, monthList)
 
     yyyymm2text = {}
-    for yyyymm in [0] + yearMonthList:
+    for yyyymm in yearMonthList:
         year = int(np.floor(yyyymm / 100))
         month = yyyymm - year * 100
         yyyymm2text[yyyymm] = f'{year}年{month}月'

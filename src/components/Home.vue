@@ -7,14 +7,11 @@
   //////////////////////////
   // info_vue.jsonの読み込み //
   //////////////////////////
-  //  yearMonthList : [200010, 200012, 200101, 200102]
-  //  yearList : [2000, 2001]
-  //  monthList : [[10, 12], [1, 2]]
   type InfoVue = {
     yearMonthList: number[],
     yearList: number[],
     monthList: number[][]
-    birthText: {[key in number]: string}  // keyはyyyymm, valueは生後の期間情報
+    birthText: {[key in number]: string}
     infoGant: {"name": string; "gant": {[key in string]: number[]}}[]
     yyyymm2pos: {[key in number]: number}
     yyyymm2text: {[key in number]: string}
@@ -23,11 +20,7 @@
   await axios.get("images/info_vue.json").then(function(response) {
     infoVue = response.data
   })
-
   const yyyymm2pos:{[key in number]: number} = infoVue["yyyymm2pos"]
-  let yearList:number[] = infoVue["yearList"]
-  let monthList = infoVue["monthList"]
-  let yearMonthList = infoVue["yearMonthList"]
 
   //////////////////////////
   // info.jsonの読み込み //
@@ -119,7 +112,7 @@
   infoPlayPhoto[0] = []
   infoThumbMovie[0] = []
   infoThumbPhoto[0] = []
-  yearMonthList.forEach(function(yyyymm, i){
+  infoVue["yearMonthList"].forEach(function(yyyymm, i){
     infoPlayMovie[yyyymm] = []
     infoPlayPhoto[yyyymm] = []
     infoThumbMovie[yyyymm] = []
@@ -250,14 +243,14 @@
 
   // 「次の月へ」のリンクをクリック時の処理
   const nextMonth = () => {
-    const idx = yearMonthList.indexOf(props.selectedYYYYMM)
-    emit('change-yyyymm', yearMonthList[idx + 1])
+    const idx = infoVue["yearMonthList"].indexOf(props.selectedYYYYMM)
+    emit('change-yyyymm', infoVue["yearMonthList"][idx + 1])
   }
 
   // 「前の月へ」のリンクをクリック時の処理
   const previousMonth = () => {
-    const idx = yearMonthList.indexOf(props.selectedYYYYMM)
-    emit('change-yyyymm', yearMonthList[idx - 1])
+    const idx = infoVue["yearMonthList"].indexOf(props.selectedYYYYMM)
+    emit('change-yyyymm', infoVue["yearMonthList"][idx - 1])
   }
 
 </script>
@@ -265,8 +258,8 @@
 <template>
   <!-- 上部のメニューバー -->
   <Nav :infoGant="infoGant"
-       :yearList="yearList"
-       :monthList="monthList"
+       :yearList="infoVue['yearList']"
+       :monthList="infoVue['monthList']"
        :selectedYYYYMM="selectedYYYYMM"
        :cellWidth="cellWidth"
        :allWidth="allWidth"
@@ -296,7 +289,7 @@
   <!-- 下部のページ移動リンク -->
   <template v-if="selectedYYYYMM !== 0">
     <div class="bottom-link">
-      <template v-if="selectedYYYYMM !== yearList[0] * 100 + monthList[0][0]">
+      <template v-if="selectedYYYYMM !== infoVue['yearMonthList'][0]">
         <span class="link" @click="previousMonth">
           <u >前の月</u>
         </span>
@@ -307,7 +300,7 @@
         {{ infoVue['yyyymm2text'][selectedYYYYMM] }}
       </span>
 
-      <template v-if="selectedYYYYMM !== yearList.slice(-1)[0] * 100 + monthList.slice(-1)[0].slice(-1)[0]">
+      <template v-if="selectedYYYYMM !== infoVue['yearMonthList'].slice(-1)[0]">
         ＞
         <span class="link" @click="nextMonth">
           <u>次の月</u>
