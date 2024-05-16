@@ -126,10 +126,6 @@ def main():
     else:
         info_old = {'birth': [], 'short': [], 'long': [], 'photo': []}
 
-    # birth
-    with open('images/info_birth.json', 'r', encoding='utf-8') as f:
-        info_new['birth'] = json.load(f)
-
     # thumb
     with open('images/info_thumb.json', 'r', encoding='utf-8') as f:
         info_thumb = json.load(f)
@@ -284,12 +280,15 @@ def main():
         idx = yearList.index(year)
         monthList[idx].append(month)
 
+    # birth
+    with open('images/info_birth.json', 'r', encoding='utf-8') as f:
+        birthInfo = json.load(f)
     birthText = {}
     for yyyymm in yearMonthList:
         year = int(np.floor(yyyymm / 100))
         month = yyyymm - year * 100
         txt = ""
-        for d in info_new['birth']:
+        for d in birthInfo:
             name = d['name']
             birthYYYYMM = int(np.floor(d['date'] / 100))
             birthYYYY = int(np.floor(birthYYYYMM / 100))
@@ -314,7 +313,7 @@ def main():
 
 
     infoGant = []
-    for d in info_new['birth']:
+    for d in birthInfo:
         birthday = d['date']
         info = {}
         age = -1

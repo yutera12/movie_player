@@ -53,12 +53,6 @@
   }[]
   let longData:LongData = []
 
-  type BirthData = {
-    name: string;
-    date: number;
-  }[]
-  let birthData:BirthData = []
-
   type PhotoData = {
     fileName: string;
     thumbnailFile: string;
@@ -69,19 +63,17 @@
   let photoData:PhotoData = []
 
   type Data = {
-    birth: BirthData,
     short: ShortData,
     long: LongData,
     photo: PhotoData,
   }
-  let data:Data = {"birth": [], "short": [], "long": [], "photo": []}
+  let data:Data = {"short": [], "long": [], "photo": []}
 
   await axios.get("images/info.json").then(function(response) {
     data = response.data
   })
   shortData = data["short"]
   longData = data["long"]
-  birthData = data["birth"]
   photoData = data["photo"]
 
   ///////////////////////////////////////////////////////////////
