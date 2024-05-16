@@ -15,8 +15,11 @@
     infoGant: {"name": string; "gant": {[key in string]: number[]}}[]
     yyyymm2pos: {[key in number]: number}
     yyyymm2text: {[key in number]: string}
+    infoThumbPhoto: {[key in number]: {fileName: string; id: number; date: string; aspectRatio: number;}[]}
+    infoPlayPhoto: {[key in number]:{fileName: string; date: string; id: number;}[]}
   }
-  let infoVue:InfoVue = {"yearMonthList": [], "yearList": [], "monthList": [[]], "birthText": {0: ""}, "infoGant":[], "yyyymm2pos":{}, "yyyymm2text":{}}
+  let infoVue:InfoVue = {"yearMonthList": [], "yearList": [], "monthList": [[]],
+  "birthText": {0: ""}, "infoGant":[], "yyyymm2pos":{}, "yyyymm2text":{}, "infoThumbPhoto": {}, "infoPlayPhoto": {}}
   await axios.get("images/info_vue.json").then(function(response) {
     infoVue = response.data
   })
@@ -79,13 +82,6 @@
       id: number;
     }[]
   }
-  type InfoPlayPhoto = {
-    [key in number]: {  // keyはyyyymm
-      fileName: string;
-      date: string;
-      id: number;
-    }[]
-  }
   type InfoThumbMovie = {
     [key in number]: {  // keyはyyyymm
       fileName: string;
@@ -95,32 +91,17 @@
       aspectRatio: number;
     }[]
   }
-  type InfoThumbPhoto = {
-    [key in number]: {  // keyはyyyymm
-      fileName: string;
-      id: number;
-      date: string;
-      aspectRatio: number;
-    }[]
-  }
 
   const infoPlayMovie: InfoPlayMovie = {}
-  const infoPlayPhoto: InfoPlayPhoto = {}
   const infoThumbMovie: InfoThumbMovie = {}
-  const infoThumbPhoto: InfoThumbPhoto = {}
   infoPlayMovie[0] = []
-  infoPlayPhoto[0] = []
   infoThumbMovie[0] = []
-  infoThumbPhoto[0] = []
   infoVue["yearMonthList"].forEach(function(yyyymm, i){
     infoPlayMovie[yyyymm] = []
-    infoPlayPhoto[yyyymm] = []
     infoThumbMovie[yyyymm] = []
-    infoThumbPhoto[yyyymm] = []
   })
 
   let id_movie = 0
-  let id_photo = 0
 
   // short
   shortData.forEach(function(d, i){
@@ -170,33 +151,6 @@
     id_movie += 1
   })
 
-  photoData.forEach(function(d, i){
-
-    // infoThumbPhoto作成 //
-    infoThumbPhoto[d.yyyymm].push(
-      {
-        fileName: d.thumbnailFile,
-        id: id_photo,
-        date: d.date,
-        aspectRatio: d.aspectRatio
-      }
-    )
-
-    // infoPlayPhoto作成 //
-    infoPlayPhoto[d.yyyymm].push({
-      fileName: d.fileName,
-      date: d.date,
-      id: id_photo
-    })
-
-    infoPlayPhoto[0].push({
-      fileName: d.fileName,
-      date: d.date,
-      id: id_photo
-    })
-
-    id_photo += 1
-  })
 
   //////////////////////////////////////////////////////////////////
   // birthTextList(「a：0歳8ヵ月～0歳9ヵ月、b：誕生前」の表示に必要) //
@@ -222,7 +176,7 @@
     if (isMovie){
       emit('go-to-play-movie', infoPlayMovie[props.selectedYYYYMM], id, props.selectedYYYYMM === 0)
     } else {
-      emit('go-to-play-photo', infoPlayPhoto[props.selectedYYYYMM], id)
+      emit('go-to-play-photo', infoVue["infoPlayPhoto"][props.selectedYYYYMM], id)
     }
   }
   const changeYYYYMM = (yyyymm: number) => {  // 何年何月が選択されたかを受け取る
@@ -281,7 +235,7 @@
   </h1>
   <!-- サムネイル -->
   <Thumb :infoThumbMovie="infoThumbMovie[selectedYYYYMM]"
-         :infoThumbPhoto="infoThumbPhoto[selectedYYYYMM]"
+         :infoThumbPhoto="infoVue['infoThumbPhoto'][selectedYYYYMM]"
          :selectedYYYYMM="selectedYYYYMM"
          @go-to-play="goToPlay"
          id="thumb"/>

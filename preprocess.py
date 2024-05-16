@@ -340,6 +340,42 @@ def main():
         month = yyyymm - year * 100
         yyyymm2text[yyyymm] = f'{year}年{month}月'
 
+    infoThumbPhoto = {}
+    infoPlayPhoto = {}
+    infoPlayPhoto[0] = []
+    infoThumbPhoto[0] = []
+    for yyyymm in yearMonthList:
+        infoPlayPhoto[yyyymm] = []
+        infoThumbPhoto[yyyymm] = []
+
+    id_photo = 0
+    for d in info_new['photo']:
+        infoThumbPhoto[d['yyyymm']].append(
+            {
+              'fileName': d['thumbnailFile'],
+              'id': id_photo,
+              'date': d['date'],
+              'aspectRatio': d['aspectRatio']
+            }
+        )
+
+        infoPlayPhoto[d['yyyymm']].append(
+            {
+                'fileName': d['fileName'],
+                'date': d['date'],
+                'id': id_photo
+            }
+        )
+
+        infoPlayPhoto[0].append(
+            {
+                'fileName': d['fileName'],
+                'date': d['date'],
+                'id': id_photo
+            }
+        )
+        id_photo += 1
+
     info_vue = {
         'yearMonthList': yearMonthList,
         'yearList' : yearList,
@@ -347,10 +383,15 @@ def main():
         'birthText': birthText,
         'infoGant': infoGant,
         'yyyymm2pos': yyyymm2pos,
-        'yyyymm2text': yyyymm2text
+        'yyyymm2text': yyyymm2text,
+        'infoThumbPhoto': infoThumbPhoto,
+        'infoPlayPhoto': infoPlayPhoto
     }
     with open('images/info_vue.json', 'w', encoding='utf-8') as f:
         json.dump(info_vue, f, ensure_ascii=False, indent=2)
+
+
+
 
 
 if __name__ == '__main__':
