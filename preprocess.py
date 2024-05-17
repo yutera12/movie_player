@@ -172,30 +172,28 @@ def main():
     errFiles = []
     for filename in tqdm(movieFiles):
         filenameWOext = os.path.splitext(os.path.basename(filename))[0]
+        year, month, day, yyyymm = extractDataFromFilename(filename)
 
         # サムネイル作成
-        dt = info_thumb[filename]
-        time = dt[0] * 60 + dt[1]
-        thumbFileName = f'{filenameWOext}__{time}.png'
-        create_thumbnail(time, thumbFileName, filename)
+        if not year is None:
+            dt = info_thumb[filename]
+            time = dt[0] * 60 + dt[1]
+            thumbFileName = f'{filenameWOext}__{time}.png'
+            create_thumbnail(time, thumbFileName, filename)
 
-        if f'images/images/{filename}' in preproccedShortMovieFiles:
-            idx = preproccedShortMovieFiles.index(f'images/images/{filename}')
-            info_image['short'].append(info_old['short'][idx])
-        else:
-            cmd = f'ffprobe images/images/{filename} -hide_banner -show_entries format=duration'
-            r = subprocess.run(cmd, stdout=subprocess.PIPE)
-            totalTime = float(str(r.stdout)[23:-18])
-            cmd = f'ffmpeg -i images/images/{filename}'
-            r = subprocess.run(cmd, stderr=subprocess.PIPE)
-            if '16:9' in str(r.stderr) or '1920x1080' in str(r.stderr):
-                aspectRatio = 16 / 9
+            if f'images/images/{filename}' in preproccedShortMovieFiles:
+                idx = preproccedShortMovieFiles.index(f'images/images/{filename}')
+                info_image['short'].append(info_old['short'][idx])
             else:
-                assert False, str(r.stderr)
-            year, month, day, yyyymm = extractDataFromFilename(filename)
-            if year is None:
-                errFiles.append(filename)
-            else:
+                cmd = f'ffprobe images/images/{filename} -hide_banner -show_entries format=duration'
+                r = subprocess.run(cmd, stdout=subprocess.PIPE)
+                totalTime = float(str(r.stdout)[23:-18])
+                cmd = f'ffmpeg -i images/images/{filename}'
+                r = subprocess.run(cmd, stderr=subprocess.PIPE)
+                if '16:9' in str(r.stderr) or '1920x1080' in str(r.stderr):
+                    aspectRatio = 16 / 9
+                else:
+                    assert False, str(r.stderr)
                 info_image['short'].append({
                     'fileName': f'images/images/{filename}',
                     'totalTime': totalTime,
@@ -206,6 +204,9 @@ def main():
                     'thumbnailFile': f'images/thumbnails/{filenameWOext}__'
                       + str(ms2s(info_thumb[filename])) +'.png'
                 })
+        else:
+            errFiles.append(filename)
+
     if len(errFiles) > 0:
         print(f'{errFiles}はshort動画に含まれません')
 
@@ -229,8 +230,8 @@ def main():
             info_image['long'].append(info_old['long'][idx])
         else:
             times = []
-            for f in fileNames:
-                cmd = f'ffprobe images/images/{f} -hide_banner -show_entries format=duration'
+            for filename in fileNames:
+                cmd = f'ffprobe images/images/{filename} -hide_banner -show_entries format=duration'
                 r = subprocess.run(cmd, stdout=subprocess.PIPE)
                 totalTime = float(str(r.stdout)[23:-18])
                 times.append(totalTime)
