@@ -73,7 +73,7 @@ def create_thumbnail(time, thumbFileName, orgFileName):
 def totalTimeThumb(time):
     if time > 59.5:
         m = int(np.floor(np.round(time) / 60))
-        s = np.round(time - m * 60)
+        s = int(np.round(time - m * 60))
         return f'{m}分{s}秒'
     return f'{int(np.round(time))}秒'
 
