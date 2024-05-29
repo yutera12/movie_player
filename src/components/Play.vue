@@ -45,6 +45,18 @@
       filePaths.push(d.fileName)
       totalTime.push(d.totalTime)
   })
+  let tooltip = ref({
+    "home1": false,
+    "home2": false,
+    "skip_plus1": false,
+    "skip_plus2": false,
+    "skip_minus1": false,
+    "skip_minus2": false,
+    "proceed1": false,
+    "proceed2": false,
+    "back1": false,
+    "back2": false
+  })
   let currentTime = ref(0)  // 現在の再生時間
 
   // DOM読み込み後に実行
@@ -115,6 +127,13 @@
     videoElem.currentTime = 0
   }
 
+  const mover = (key: "home1" | "skip_plus1" | "skip_minus1" | "proceed1" | "back1" | "home2" | "skip_plus2" | "skip_minus2" | "proceed2" | "back2") => {
+    tooltip.value[key] = true
+  }
+  const mleave = (key: "home1" | "skip_plus1" | "skip_minus1" | "proceed1" | "back1" | "home2" | "skip_plus2" | "skip_minus2" | "proceed2" | "back2") => {
+    tooltip.value[key] = false
+  }
+
 </script>
 
 <template>
@@ -127,17 +146,25 @@
     style="position: absolute; width:100%; height: 100%; z-index:-100; background: black"
     @click="pause_or_play()"
   ></video>
-  <div class="circle" style="left: 5px;"  @click="toMenu()"></div>
-  <div class="circle" style="left: 59px;" @click="skipSecond(-5)"></div>
-  <div class="circle" style="left: 113px;" @click="skipSecond(10)"></div>
-  <div class="circle" style="left: 167px;" @click="back()"></div>
-  <div v-if="filePaths.length > 1" class="circle" style="left: 221px;" @click="proceed()"></div>
-  <img src="/images/icon/home.png" class="icon" style="left: 8px;" @click="toMenu()">
-  <div class="changeTime" style="left: 74px;" @click="skipSecond(-5)">-5</div>
-  <div class="changeTime" style="left: 116px;" @click="skipSecond(10)">+10</div>
-  <img src="/images/icon/leftarrow.png" class="icon" style="left: 168px;" @click="back()">
-  <img v-if="filePaths.length > 1" src="/images/icon/rightarrow.png" class="icon" style="left: 222px;" @click="proceed()">
-  <div style="position: absolute; bottom: 5px; right: 20px; font-size: 25px; color: rgb(255,255,255,0.5)">
+  <div class="tooltip" style="left: 5px" v-if="tooltip['home1'] || tooltip['home2'] ">ホームに戻る</div>
+  <div class="tooltip" style="left: 49px" v-if="tooltip['skip_minus1'] || tooltip['skip_minus2']">5秒戻る</div>
+  <div class="tooltip" style="left: 93px" v-if="tooltip['skip_plus1'] || tooltip['skip_plus2']">10秒進む</div>
+  <div class="tooltip" style="left: 137px" v-if="tooltip['back1'] || tooltip['back2']">前へ戻る</div>
+  <div class="tooltip" style="left: 186px" v-if="tooltip['proceed1'] || tooltip['proceed2']">次へ進む</div>
+
+  <div class="circle" style="left: 5px;"  @click="toMenu()" @mouseover="mover('home1')" @mouseleave="mleave('home1')"></div>
+  <div class="circle" style="left: 49px;" @click="skipSecond(-5)" @mouseover="mover('skip_minus1')" @mouseleave="mleave('skip_minus1')"></div>
+  <div class="circle" style="left: 93px;" @click="skipSecond(10)" @mouseover="mover('skip_plus1')" @mouseleave="mleave('skip_plus1')"></div>
+  <div class="circle" style="left: 137px;" @click="back()" @mouseover="mover('back1')" @mouseleave="mleave('back1')"></div>
+  <div v-if="filePaths.length > 1" class="circle" style="left: 181px;" @click="proceed()" @mouseover="mover('proceed1')" @mouseleave="mleave('proceed1')"></div>
+
+  <img src="/images/icon/home.png" class="icon" style="left: 10px;" @click="toMenu()" @mouseover="mover('home2')" @mouseleave="mleave('home2')">
+  <div class="changeTime" style="left: 62px;" @click="skipSecond(-5)" @mouseover="mover('skip_minus2')" @mouseleave="mleave('skip_minus2')">-5</div>
+  <div class="changeTime" style="left: 95px;" @click="skipSecond(10)"  @mouseover="mover('skip_plus2')" @mouseleave="mleave('skip_plus2')">+10</div>
+  <img src="/images/icon/leftarrow.png" class="icon" style="left: 141px;" @click="back()" @mouseover="mover('back2')" @mouseleave="mleave('back2')">
+  <img v-if="filePaths.length > 1" src="/images/icon/rightarrow.png" class="icon" style="left: 186px;" @click="proceed()" @mouseover="mover('proceed2')" @mouseleave="mleave('proceed2')">
+
+  <div style="position: absolute; bottom: 5px; right: 20px; font-size: 20px; color: rgb(255,255,255,0.5)">
     <span v-if="props.isLong"> {{format(retCurrentTimeLong(currentTime, ind, totalTime))}}/{{ format(retTotalTimeLong(totalTime)) }}秒, {{ind + 1}}/{{filePaths.length}}チャプタ</span>
     <span v-else>{{currentTime}}/{{format(totalTime[ind])}}秒</span>
   </div>
@@ -145,8 +172,8 @@
 
 <style scoped>
 .circle{
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   border-radius:50%;
   background: rgb(255,255,255,0.5);
   position: absolute;
@@ -155,16 +182,24 @@
 }
 .changeTime{
   position: absolute;
-  bottom: 17px;
-  font-size: 25px;
+  bottom: 13px;
+  font-size: 22px;
   cursor: pointer;
   color: #303030
 }
 .icon{
-  width: 45px;
-  height: 45px;
+  width: 30px;
+  height: 30px;
   position: absolute;
-  bottom: 8px;
+  bottom: 10px;
   cursor: pointer;
+}
+
+.tooltip{
+  bottom: 50px;
+  padding: 2px;
+  position: absolute;
+  border: solid 0.5px #3a2411;
+  background: #f1eac3;
 }
 </style>
