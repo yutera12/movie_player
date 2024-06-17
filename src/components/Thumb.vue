@@ -59,8 +59,15 @@
     <div v-if="infoThumbPhoto.length > 0 || selectedYYYYMM == 0">
       <h2 class="index">写真</h2>
       <div class="grid">
-        <div v-if="selectedYYYYMM==0" style="width: 150px" @click="goToPlay(0, false)">
-          <img src="/images/icon/repeat.png" class="item">
+        <div :style="retStyle(1, 4 / 3)">
+          <img src="/images/icon/play.png" class="item">
+          <p class="item time-date">
+            <div class="time"></div>
+            <div class="date">全て</div>
+          </p>
+        </div>
+        <div :style="retStyle(1, 4 / 3)">
+          <img src="/images/icon/shuffle.png" class="item">
           <p class="item time-date">
             <div class="time"></div>
             <div class="date">全て</div>

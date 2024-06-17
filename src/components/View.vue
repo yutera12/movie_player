@@ -26,7 +26,7 @@
     index: number
   }>();
   let ind = ref(props.index)
-  let indList = [...Array(props.infoPlay.length)].map((_, i) => i)  // [0, 1, ... , inroPlay.length]
+  let indList = [...Array(props.infoPlay.length)].map((_, i) => i)  // [0, 1, ... , infoPlay.length]
   let isShuffle = ref(false)
   let isPlay = ref(false)
   let timer = ref(0)
@@ -68,7 +68,7 @@
   const shuffle_switch = () => {
     if(isShuffle.value){
       ind.value = indList[ind.value]
-      indList = [...Array(props.infoPlay.length)].map((_, i) => i)  // [0, 1, ... , inroPlay.length]
+      indList = [...Array(props.infoPlay.length)].map((_, i) => i)  // [0, 1, ... , infoPlay.length]
       isShuffle.value = false
     } else {
       ind.value = 0
@@ -94,18 +94,18 @@
   <div class = "content" style="height: 100vh; width:100vw;">
     <img class="img" :src="infoPlay[indList[ind]].fileName" style="height: 100%; width:100%; object-fit: contain ;z-index:-100; background: black">
     <div class="circle" style="left: 5px;"  @click="toMenu()"></div>
-    <img src="/images/icon/home.png" class="icon1" style="left: 8px; bottom: 8px;" @click="toMenu()">
+    <img src="/images/icon/home.png" class="icon1" style="left: 10px; bottom: 10px;" @click="toMenu()">
     <div v-if="infoPlay.length > 1">
-      <div class="circle" style="left: 59px;" @click="back()"></div>
-      <div class="circle" style="left: 113px;" @click="proceed()"></div>
-      <div class="circle" style="left: 167px;" @click="pause_play_switch()"></div>
-      <div class="circle" style="left: 221px;" @click="shuffle_switch()"></div>
-      <img src="/images/icon/leftarrow.png" class="icon1" style="left: 62px; bottom: 8px;" @click="back()">
-      <img src="/images/icon/rightarrow.png" class="icon1" style="left: 114px; bottom: 8px;" @click="proceed()">
-      <img v-if="isPlay" src="/images/icon/play.png" class="icon1" style="left: 170px; bottom: 7px;" @click="pause_play_switch()">
-      <img v-if="!isPlay" src="/images/icon/pause.png" class="icon1" style="left: 170px; bottom: 7px;" @click="pause_play_switch()">
-      <img v-if="!isShuffle" src="/images/icon/repeat.png" class="icon1" style="left: 223px; bottom: 8px;" @click="shuffle_switch()">
-      <img v-if="isShuffle" src="/images/icon/shuffle.png" class="icon2" style="left: 226px; bottom: 11px;" @click="shuffle_switch()">
+      <div class="circle" style="left: 49px;" @click="back()"></div>
+      <div class="circle" style="left: 93px;" @click="proceed()"></div>
+      <div class="circle" style="left: 137px;" @click="pause_play_switch()"></div>
+      <div class="circle" style="left: 181px;" @click="shuffle_switch()"></div>
+      <img src="/images/icon/leftarrow.png" class="icon1" style="left: 54px; bottom: 8px;" @click="back()">
+      <img src="/images/icon/rightarrow.png" class="icon1" style="left: 98px; bottom: 8px;" @click="proceed()">
+      <img v-if="isPlay" src="/images/icon/play.png" class="icon1" style="left: 142px; bottom: 10px;" @click="pause_play_switch()">
+      <img v-if="!isPlay" src="/images/icon/pause.png" class="icon1" style="left: 142px; bottom: 10px;" @click="pause_play_switch()">
+      <img v-if="!isShuffle" src="/images/icon/repeat.png" class="icon1" style="left: 187px; bottom: 8px;" @click="shuffle_switch()">
+      <img v-if="isShuffle" src="/images/icon/shuffle.png" class="icon2" style="left: 190px; bottom: 11px;" @click="shuffle_switch()">
     </div>
     <div style="position: absolute; bottom: 5px; right: 20px; font-size: 25px; color: rgb(255,255,255,0.5)">
       <span> {{ infoPlay[indList[ind]].date }}</span>
@@ -119,8 +119,8 @@
   overflow-y:hidden;
 }
 .circle{
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   border-radius:50%;
   background: rgb(255,255,255,0.5);
   position: absolute;
@@ -128,14 +128,14 @@
   cursor: pointer;
 }
 .icon1{
-  width: 45px;
-  height: 45px;
+  width: 30px;
+  height: 30px;
   position: absolute;
   cursor: pointer;
 }
 .icon2{
-  width: 38px;
-  height: 38px;
+  width: 28px;
+  height: 28px;
   position: absolute;
   cursor: pointer;
 }

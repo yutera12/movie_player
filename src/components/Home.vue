@@ -137,7 +137,7 @@
     margin-bottom: 20px;
     color: #3a2411;
     max-width: 1100px;
-    margin: 20px auto;
+    margin: 20px 0px;
   }
   .text {
     margin-left: 10px;
