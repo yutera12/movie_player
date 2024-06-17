@@ -40,49 +40,33 @@
 
 
 <template>
-  <div class="wrapper">
-    <div v-if="infoThumbMovie.length > 0">
-      <h2 class="index">動画</h2>
-      <div class="grid">
-        <template v-for="(v, index) in infoThumbMovie" :key="v.id">
-          <div :style="retStyle(v.aspectRatio, 16 / 9)">
-            <img :src="v.fileName"
-                  class="item" @click="goToPlay(index, true)">
-            <p class="item time-date">
-              <div class="time">{{ v.totalTime }}</div>
-              <div class="date">{{ v.date }}</div>
-            </p>
-          </div>
-        </template>
-      </div>
+  <div v-if="infoThumbMovie.length > 0">
+    <h2 class="index">動画<span class="index2">すべて再生</span></h2>
+    <div class="grid">
+      <template v-for="(v, index) in infoThumbMovie" :key="v.id">
+        <div :style="retStyle(v.aspectRatio, 16 / 9)">
+          <img :src="v.fileName"
+                class="item" @click="goToPlay(index, true)">
+          <p class="item time-date">
+            <div class="time">{{ v.totalTime }}</div>
+            <div class="date">{{ v.date }}</div>
+          </p>
+        </div>
+      </template>
     </div>
-    <div v-if="infoThumbPhoto.length > 0 || selectedYYYYMM == 0">
-      <h2 class="index">写真</h2>
-      <div class="grid">
-        <div :style="retStyle(1, 4 / 3)">
-          <img src="/images/icon/play.png" class="item">
+  </div>
+  <div v-if="infoThumbPhoto.length > 0 || selectedYYYYMM == 0">
+    <h2 class="index">写真<span class="index2" @click="goToPlay(0, false)">スライドショー</span></h2>
+    <div class="grid">
+      <template v-for="(v, index) in infoThumbPhoto" :key="v.id">
+        <div :style="retStyle(v.aspectRatio, 4 / 3)">
+          <img :src="v.fileName"
+                class="item" @click="goToPlay(index, false)">
           <p class="item time-date">
-            <div class="time"></div>
-            <div class="date">全て</div>
+            <div class="date">{{ v.date }}</div>
           </p>
         </div>
-        <div :style="retStyle(1, 4 / 3)">
-          <img src="/images/icon/shuffle.png" class="item">
-          <p class="item time-date">
-            <div class="time"></div>
-            <div class="date">全て</div>
-          </p>
-        </div>
-        <template v-for="(v, index) in infoThumbPhoto" :key="v.id">
-          <div :style="retStyle(v.aspectRatio, 4 / 3)">
-            <img :src="v.fileName"
-                  class="item" @click="goToPlay(index, false)">
-            <p class="item time-date">
-              <div class="date">{{ v.date }}</div>
-            </p>
-          </div>
-        </template>
-      </div>
+      </template>
     </div>
   </div>
 </template>
@@ -93,16 +77,15 @@
     margin-bottom: 20px;
     color: #3a2411;
     max-width: 1100px;
-    margin: 20px auto;
-    margin-left: 10px;
-
+    margin: 20px 0px 20px 5px;
+  }
+  .index2 {
+    font-size: 16px;
+    margin-left: 40px;
+    text-decoration: underline;
   }
   img {
     cursor: pointer;
-  }
-  .wrapper{
-    max-width: 1100px;
-    margin: 0 auto;
   }
   .grid{
     display: grid;

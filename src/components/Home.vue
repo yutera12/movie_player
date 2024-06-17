@@ -84,46 +84,44 @@
   />
 
   <!-- 上部見出し -->
-  <h1 v-if="selectedYYYYMM != 0" class="title">
-    <span class="text">
+  <div class="wrapper">
+    <h1 v-if="selectedYYYYMM != 0" class="title">
       {{infoVue['yyyymm2text'][selectedYYYYMM]}}
-    </span>
-    <span class="birth-info">
-      {{ infoVue["birthText"][selectedYYYYMM] }}
-    </span>
-  </h1>
-  <h1 v-else class="title">
-    <span class="text">まとめ</span>
-  </h1>
-  <!-- サムネイル -->
-  <Thumb :infoThumbMovie="infoVue['thumbMovie'][selectedYYYYMM]"
-         :infoThumbPhoto="infoVue['thumbPhoto'][selectedYYYYMM]"
-         :selectedYYYYMM="selectedYYYYMM"
-         @go-to-play="goToPlay"
-         id="thumb"/>
-
-  <!-- 下部のページ移動リンク -->
-  <template v-if="selectedYYYYMM !== 0">
-    <div class="bottom-link">
-      <template v-if="selectedYYYYMM !== infoVue['yearMonthList'][0]">
-        <span class="link" @click="previousMonth">
-          <u >前の月</u>
-        </span>
-        ＜
-      </template>
-
-      <span class="bottom-yyyymm">
-        {{ infoVue['yyyymm2text'][selectedYYYYMM] }}
+      <span class="birth-info">
+        {{ infoVue["birthText"][selectedYYYYMM] }}
       </span>
+    </h1>
+    <h1 v-else class="title">まとめ</h1>
+    <!-- サムネイル -->
+    <Thumb :infoThumbMovie="infoVue['thumbMovie'][selectedYYYYMM]"
+          :infoThumbPhoto="infoVue['thumbPhoto'][selectedYYYYMM]"
+          :selectedYYYYMM="selectedYYYYMM"
+          @go-to-play="goToPlay"
+          id="thumb"/>
 
-      <template v-if="selectedYYYYMM !== infoVue['yearMonthList'].slice(-1)[0]">
-        ＞
-        <span class="link" @click="nextMonth">
-          <u>次の月</u>
+    <!-- 下部のページ移動リンク -->
+    <template v-if="selectedYYYYMM !== 0">
+      <div class="bottom-link">
+        <template v-if="selectedYYYYMM !== infoVue['yearMonthList'][0]">
+          <span class="link" @click="previousMonth">
+            <u >前の月</u>
+          </span>
+          ＜
+        </template>
+
+        <span class="bottom-yyyymm">
+          {{ infoVue['yyyymm2text'][selectedYYYYMM] }}
         </span>
-      </template>
-    </div>
-  </template>
+
+        <template v-if="selectedYYYYMM !== infoVue['yearMonthList'].slice(-1)[0]">
+          ＞
+          <span class="link" @click="nextMonth">
+            <u>次の月</u>
+          </span>
+        </template>
+      </div>
+    </template>
+  </div>
 </template>
 
 <style scoped>
@@ -134,13 +132,10 @@
   }
   .title {
     font-size: 40px;
-    margin-bottom: 20px;
+    margin: 20px 0px;
+    padding-left: 0px;
     color: #3a2411;
     max-width: 1100px;
-    margin: 20px 0px;
-  }
-  .text {
-    margin-left: 10px;
   }
   .birth-info {
     margin-left: 10px;
@@ -156,5 +151,9 @@
     margin-top: 40px;
     margin-bottom: 40px;
     font-size:16px;
+  }
+  .wrapper{
+    max-width: 1100px;
+    margin: 0 auto;
   }
 </style>
