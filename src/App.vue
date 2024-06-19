@@ -51,9 +51,10 @@
   let playAll = ref(true)  // スライドショー、動画全再生を実行するか否か
 
   // 動画のサムネイルクリック時に発火するイベント（Thumb.vue -> Home.vue -> App.vueと伝搬）
-  const goToPlayMovie = (infoOrg:InfoPlayMovieOrg, index:number, isLongFlag: boolean) => {
+  const goToPlayMovie = (infoOrg:InfoPlayMovieOrg, index:number, playAll_:boolean, isLongFlag: boolean) => {
     currentPage.value = "play"
     isLong.value = isLongFlag
+    playAll.value = playAll_
     infoPlayMovie = []
     if (isLong.value){
       for(let i = 0; i < infoOrg[index].fileName.length; i++){
@@ -99,6 +100,7 @@
           :infoPlayMovie="infoPlayMovie"
           :index=indexPlay
           :isLong="isLong"
+          :playAll="playAll"
           @go-to-home="goToHome" />
     <View v-if="currentPage === 'view'"
           :infoPlay="infoPlayPhoto"

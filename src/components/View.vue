@@ -6,7 +6,6 @@
   type InfoPlay = {
     fileName: string;
     date: string;
-    playAll: boolean;
   }[]
 
   // DOM読み込み後に実行

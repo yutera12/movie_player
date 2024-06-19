@@ -37,6 +37,7 @@
     infoPlayMovie:InfoPlayMovie
     isLong: boolean
     index: number
+    playAll: boolean
   }>();
   let ind = ref(props.index)
   let filePaths:string[] = []
@@ -66,12 +67,12 @@
       currentTime.value = format(videoElem.currentTime)
     })
 
-    if(props.isLong){
+    if(props.isLong || props.playAll){
       // 終了したら次のチャプターへ移動し自動再生
       videoElem.addEventListener('ended', (event) => {
         if (ind.value + 1 < filePaths.length){
           ind.value += 1
-          setTimeout(function(){videoElem.play()},1000);
+          setTimeout(function(){videoElem.play()}, 1000);
         }
       })
     }
@@ -98,7 +99,7 @@
   // スキップボタン
   const skipSecond = (s: number) => {
     const videoElem = <HTMLMediaElement>document.getElementById('video');
-    videoElem.currentTime = Math.min(Math.max(videoElem.currentTime + s, 0), totalTime[props.index])
+    videoElem.currentTime = Math.min(Math.max(videoElem.currentTime + s, 0), totalTime[ind.value])
   }
 
   // 進むボタン
@@ -165,7 +166,7 @@
   <img v-if="filePaths.length > 1" src="/images/icon/rightarrow.png" class="icon" style="left: 186px;" @click="proceed()" @mouseover="mover('proceed2')" @mouseleave="mleave('proceed2')">
 
   <div style="position: absolute; bottom: 5px; right: 20px; font-size: 20px; color: rgb(255,255,255,0.5)">
-    <span v-if="props.isLong"> {{format(retCurrentTimeLong(currentTime, ind, totalTime))}}/{{ format(retTotalTimeLong(totalTime)) }}秒, {{ind + 1}}/{{filePaths.length}}チャプタ</span>
+    <span v-if="props.isLong || props.playAll"> {{format(retCurrentTimeLong(currentTime, ind, totalTime))}}/{{ format(retTotalTimeLong(totalTime)) }}秒, {{ind + 1}}/{{filePaths.length}}チャプタ</span>
     <span v-else>{{currentTime}}/{{format(totalTime[ind])}}秒</span>
   </div>
 </template>

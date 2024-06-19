@@ -41,7 +41,7 @@
 
 <template>
   <div v-if="infoThumbMovie.length > 0">
-    <h2 class="index">動画<span class="index2">すべて再生</span></h2>
+    <h2 class="index">動画<span class="index2" @click="goToPlay(0, true, true)">すべて再生</span></h2>
     <div class="grid">
       <template v-for="(v, index) in infoThumbMovie" :key="v.id">
         <div :style="retStyle(v.aspectRatio, 16 / 9)">

@@ -36,7 +36,7 @@
   const emit = defineEmits(['go-to-play-movie', 'go-to-play-photo', 'change-yyyymm'])
   const goToPlay = (id: number, isMovie:boolean, playAll:boolean) => { // 何番目のサムネイルをクリックしたかを受け取る
     if (isMovie){
-      emit('go-to-play-movie', infoVue["playMovie"][props.selectedYYYYMM], id, props.selectedYYYYMM === 0)
+      emit('go-to-play-movie', infoVue["playMovie"][props.selectedYYYYMM], id, playAll, props.selectedYYYYMM === 0)
     } else {
       emit('go-to-play-photo', infoVue["playPhoto"][props.selectedYYYYMM], id, playAll)
     }
