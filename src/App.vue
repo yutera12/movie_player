@@ -48,6 +48,7 @@
   let infoPlayMovie:InfoPlayMovie = reactive([])
   let infoPlayPhoto:InfoPlayPhoto = reactive([])
   let selectedYYYYMM = ref(0)  // 何年何月が選択されたか、0はALL
+  let playAll = ref(true)  // スライドショー、動画全再生を実行するか否か
 
   // 動画のサムネイルクリック時に発火するイベント（Thumb.vue -> Home.vue -> App.vueと伝搬）
   const goToPlayMovie = (infoOrg:InfoPlayMovieOrg, index:number, isLongFlag: boolean) => {
@@ -67,10 +68,11 @@
     }
   }
   // 画像のサムネイルクリック時に発火するイベント（Thumb.vue -> Home.vue -> App.vueと伝搬）
-  const goToPlayPhoto = (info:InfoPlayPhoto, index:number) => { // id：何番目のサムネイルがクリックされたか
+  const goToPlayPhoto = (info:InfoPlayPhoto, index:number, playAll_:boolean) => { // id：何番目のサムネイルがクリックされたか
     infoPlayPhoto = info
     indexPlay.value = index
     currentPage.value = "view"
+    playAll.value = playAll_
   }
 
   // 再生画面でhomeボタンを押したときに発火するイベント
@@ -101,6 +103,7 @@
     <View v-if="currentPage === 'view'"
           :infoPlay="infoPlayPhoto"
           :index=indexPlay
+          :playAll=playAll
           @go-to-home="goToHome" />
   </body>
 </template>

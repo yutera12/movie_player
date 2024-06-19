@@ -34,11 +34,11 @@
 
   // App.vueで定義されるイベントを発火
   const emit = defineEmits(['go-to-play-movie', 'go-to-play-photo', 'change-yyyymm'])
-  const goToPlay = (id: number, isMovie:boolean) => { // 何番目のサムネイルをクリックしたかを受け取る
+  const goToPlay = (id: number, isMovie:boolean, playAll:boolean) => { // 何番目のサムネイルをクリックしたかを受け取る
     if (isMovie){
       emit('go-to-play-movie', infoVue["playMovie"][props.selectedYYYYMM], id, props.selectedYYYYMM === 0)
     } else {
-      emit('go-to-play-photo', infoVue["playPhoto"][props.selectedYYYYMM], id)
+      emit('go-to-play-photo', infoVue["playPhoto"][props.selectedYYYYMM], id, playAll)
     }
   }
   const changeYYYYMM = (yyyymm: number) => {  // 何年何月が選択されたかを受け取る

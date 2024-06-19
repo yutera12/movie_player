@@ -19,8 +19,8 @@
 
   // Home.vueで定義されるイベントを発火
   const emit = defineEmits(['go-to-play'])
-  const goToPlay = (id: number, isMovie: boolean) => { // 何番目のサムネイルが選択されたか
-    emit('go-to-play', id, isMovie)
+  const goToPlay = (id: number, isMovie: boolean, playAll: boolean) => { // 何番目のサムネイルが選択されたか
+    emit('go-to-play', id, isMovie, playAll)
   }
 
   const retStyle = (aspectRatio: number, base: number) => {
@@ -46,7 +46,7 @@
       <template v-for="(v, index) in infoThumbMovie" :key="v.id">
         <div :style="retStyle(v.aspectRatio, 16 / 9)">
           <img :src="v.fileName"
-                class="item" @click="goToPlay(index, true)">
+                class="item" @click="goToPlay(index, true, false)">
           <p class="item time-date">
             <div class="time">{{ v.totalTime }}</div>
             <div class="date">{{ v.date }}</div>
@@ -56,12 +56,12 @@
     </div>
   </div>
   <div v-if="infoThumbPhoto.length > 0 || selectedYYYYMM == 0">
-    <h2 class="index">写真<span class="index2" @click="goToPlay(0, false)">スライドショー</span></h2>
+    <h2 class="index">写真<span class="index2" @click="goToPlay(0, false, true)">スライドショー</span></h2>
     <div class="grid">
       <template v-for="(v, index) in infoThumbPhoto" :key="v.id">
         <div :style="retStyle(v.aspectRatio, 4 / 3)">
           <img :src="v.fileName"
-                class="item" @click="goToPlay(index, false)">
+                class="item" @click="goToPlay(index, false, false)">
           <p class="item time-date">
             <div class="date">{{ v.date }}</div>
           </p>
@@ -83,6 +83,7 @@
     font-size: 16px;
     margin-left: 40px;
     text-decoration: underline;
+    cursor: pointer;
   }
   img {
     cursor: pointer;
