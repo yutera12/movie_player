@@ -20,24 +20,6 @@
     "20230407_1.mp4": [2, 0]
   }
   ```
-* `movie_player/images/info_long.json`にまとめ動画の情報を記載。内容は下の通り。
-
-  ```
-  [
-    {
-      "fileName": ["20201105.mp4", "20201105.mp4"],
-      "date": "2020年11月05日～2020年11月05日",
-      "thumbnailFile": "20201105.mp4",
-      "thumbnailTime": [0, 1]
-    },
-    {
-      "fileName": ["20201105.mp4", "20201105.mp4", "20201105.mp4"],
-      "date": "2020年11月05日～2020年11月05日",
-      "thumbnailFile": "20201105.mp4",
-      "thumbnailTime": [0, 1]
-    }
-  ]
-  ```
 
 ## 設定ファイルとサムネイルの作成
 * `cd movie_player`

@@ -47,10 +47,6 @@
   let tooltip = ref({
     "home1": false,
     "home2": false,
-    "skip_plus1": false,
-    "skip_plus2": false,
-    "skip_minus1": false,
-    "skip_minus2": false,
     "proceed1": false,
     "proceed2": false,
     "back1": false,
@@ -74,18 +70,7 @@
     })
 
     document.documentElement.requestFullscreen();
-    videoElem.play()
   })
-
-  // 停止・再生の制御
-  const pause_or_play = () => {
-    const videoElem = <HTMLMediaElement>document.getElementById('video')!
-    if (videoElem.paused) {  // 停止中
-      videoElem.play()
-    } else {  // 再生中
-      videoElem.pause()
-    }
-  }
 
   // homeボタン
   const toMenu = () => {
@@ -114,58 +99,56 @@
   // 戻るボタン
   const back = () => {
     const videoElem = <HTMLMediaElement>document.getElementById('video');
-    if (videoElem.currentTime < 1){
-      if(ind.value != 0){
-        ind.value -= 1
-        setTimeout(function(){
-          videoElem.play()
-        }, 100);
-      }
+    if(ind.value != 0){
+      ind.value -= 1
+      setTimeout(function(){
+        videoElem.play()
+      }, 100);
     }
     videoElem.currentTime = 0
   }
 
-  const mover = (key: "home1" | "skip_plus1" | "skip_minus1" | "proceed1" | "back1" | "home2" | "skip_plus2" | "skip_minus2" | "proceed2" | "back2") => {
-    tooltip.value[key] = true
+  const mover = (key: "home1" | "proceed1" | "back1" | "home2" | "proceed2" | "back2") => {
+      tooltip.value[key] = true
   }
-  const mleave = (key: "home1" | "skip_plus1" | "skip_minus1" | "proceed1" | "back1" | "home2" | "skip_plus2" | "skip_minus2" | "proceed2" | "back2") => {
+  const mleave = (key: "home1" | "proceed1" | "back1" | "home2" | "proceed2" | "back2") => {
     tooltip.value[key] = false
+  }
+
+  const func = (target) => {
+        console.log(target)
   }
 
 </script>
 
 <template>
-  <video
+  <video controls
     id="video"
     controlslist="nodownload"
     oncontextmenu="return false"
     :src="filePaths[ind]"
     preload="metadata"
     style="position: absolute; width:100%; height: 100%; z-index:-100; background: black"
-    @click="pause_or_play()"
+    v-on:keydown.up="toMenu()"
+    v-on:keydown.left="back()"
+    v-on:keydown.right="proceed()"
   ></video>
-  <div class="tooltip" style="left: 5px" v-if="tooltip['home1'] || tooltip['home2'] ">ホームに戻る</div>
-  <div class="tooltip" style="left: 49px" v-if="tooltip['skip_minus1'] || tooltip['skip_minus2']">5秒戻る</div>
-  <div class="tooltip" style="left: 93px" v-if="tooltip['skip_plus1'] || tooltip['skip_plus2']">10秒進む</div>
-  <div class="tooltip" style="left: 137px" v-if="tooltip['back1'] || tooltip['back2']">前へ戻る</div>
-  <div class="tooltip" style="left: 186px" v-if="tooltip['proceed1'] || tooltip['proceed2']">次へ進む</div>
+  <div class="tooltip" style="left: 5px" v-if="tooltip['home1'] || tooltip['home2'] ">ホーム画面に戻る(↑)</div>
+  <!-- <div class="tooltip" style="left: 49px" v-if="tooltip['back1'] || tooltip['back2']">前の動画へ戻る(←)</div>
+  <div class="tooltip" style="left: 93px" v-if="tooltip['proceed1'] || tooltip['proceed2']">次の動画へ進む(→)</div> -->
 
   <div class="circle" style="left: 5px;"  @click="toMenu()" @mouseover="mover('home1')" @mouseleave="mleave('home1')"></div>
-  <div class="circle" style="left: 49px;" @click="skipSecond(-5)" @mouseover="mover('skip_minus1')" @mouseleave="mleave('skip_minus1')"></div>
-  <div class="circle" style="left: 93px;" @click="skipSecond(10)" @mouseover="mover('skip_plus1')" @mouseleave="mleave('skip_plus1')"></div>
-  <div class="circle" style="left: 137px;" @click="back()" @mouseover="mover('back1')" @mouseleave="mleave('back1')"></div>
-  <div v-if="filePaths.length > 1" class="circle" style="left: 181px;" @click="proceed()" @mouseover="mover('proceed1')" @mouseleave="mleave('proceed1')"></div>
+  <!-- <div class="circle" style="left: 46px;" @click="back()" @mouseover="mover('back1')" @mouseleave="mleave('back1')"></div>
+  <div v-if="filePaths.length > 1" class="circle" style="left: 88px;" @click="proceed()" @mouseover="mover('proceed1')" @mouseleave="mleave('proceed1')"></div> -->
 
   <img src="/images/icon/home.png" class="icon" style="left: 10px;" @click="toMenu()" @mouseover="mover('home2')" @mouseleave="mleave('home2')">
-  <div class="changeTime" style="left: 62px;" @click="skipSecond(-5)" @mouseover="mover('skip_minus2')" @mouseleave="mleave('skip_minus2')">-5</div>
-  <div class="changeTime" style="left: 93px;" @click="skipSecond(10)"  @mouseover="mover('skip_plus2')" @mouseleave="mleave('skip_plus2')">+10</div>
-  <img src="/images/icon/leftarrow.png" class="icon" style="left: 141px;" @click="back()" @mouseover="mover('back2')" @mouseleave="mleave('back2')">
-  <img v-if="filePaths.length > 1" src="/images/icon/rightarrow.png" class="icon" style="left: 186px;" @click="proceed()" @mouseover="mover('proceed2')" @mouseleave="mleave('proceed2')">
+  <!-- <img src="/images/icon/leftarrow.png" class="icon" style="left: 52px;" @click="back()" @mouseover="mover('back2')" @mouseleave="mleave('back2')">
+  <img v-if="filePaths.length > 1" src="/images/icon/rightarrow.png" class="icon" style="left: 93px;" @click="proceed()" @mouseover="mover('proceed2')" @mouseleave="mleave('proceed2')"> -->
 
   <div style="position: absolute; bottom: 5px; right: 20px; font-size: 20px; color: rgb(255,255,255,0.5)">
     <!-- <span v-if="props.is"> {{format(retCurrentTimeLong(currentTime, ind, totalTime))}}/{{ format(retTotalTimeLong(totalTime)) }}秒, {{ind + 1}}/{{filePaths.length}}チャプタ</span> -->
     <!-- <span v-else>{{currentTime}}/{{format(totalTime[ind])}}秒</span> -->
-    <span>{{currentTime}}/{{format(totalTime[ind])}}秒</span>
+    <!-- <span>{{currentTime}}/{{format(totalTime[ind])}}秒</span> -->
   </div>
 </template>
 
@@ -176,7 +159,7 @@
   border-radius:50%;
   background: rgb(255,255,255,0.5);
   position: absolute;
-  bottom: 5px;
+  top: 5px;
   cursor: pointer;
 }
 .changeTime{
@@ -190,12 +173,12 @@
   width: 30px;
   height: 30px;
   position: absolute;
-  bottom: 10px;
+  top: 10px;
   cursor: pointer;
 }
 
 .tooltip{
-  bottom: 50px;
+  top: 50px;
   padding: 2px;
   position: absolute;
   border: solid 0.5px #3a2411;
