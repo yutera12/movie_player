@@ -7,6 +7,7 @@
       totalTime: string;
       date: string;
       aspectRatio: number;
+      title: string;
     }[],
     infoThumbPhoto: {
       fileName: string;
@@ -49,6 +50,7 @@
     <div class="grid">
       <template v-for="(v, index) in infoThumbMovie" :key="v.id">
         <div :style="retStyle(v.aspectRatio, 16 / 9)">
+          <h3 v-if="v.title != ''" class="movieTitle">{{ v.title }}</h3>
           <img :src="randomSelect(v.fileName)"
                 class="item" @click="goToPlay(index, true)">
           <p class="item time-date">
@@ -60,7 +62,7 @@
     </div>
   </div>
   <div v-if="infoThumbPhoto.length > 0 || selectedYYYYMM == 0">
-    <h2 class="index">写真 </h2>
+    <h2 class="index">写真</h2>
     <span v-if="selectedYYYYMM == 0" class="index2" @click="goToPlay(0, false)">全写真スライドショー</span>
     <div class="grid">
       <template v-for="(v, index) in infoThumbPhoto" :key="v.id">
@@ -80,7 +82,7 @@
 
 <style scoped>
   .index {
-    font-size: 20px;
+    font-size: 25px;
     margin-bottom: 20px;
     color: #3a2411;
     max-width: 1100px;
@@ -91,6 +93,10 @@
     margin-left: 40px;
     text-decoration: underline;
     cursor: pointer;
+  }
+  .movieTitle{
+    font-size: 20px;
+    margin-left: 5px;
   }
   img {
     cursor: pointer;

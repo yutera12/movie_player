@@ -18,7 +18,7 @@
     thumbPhoto: {[key in number]: {fileName: string; id: number; date: string; aspectRatio: number;}[]}
     playPhoto: {[key in number]:{fileName: string; date: string; id: number;}[]}
     playMovie: {[key in number]: {totalTime: number[]; fileName: string[]; id: number;}[]}
-    thumbMovie: {[key in number]: {fileName: string[]; id: number; totalTime: string; date: string; aspectRatio: number;}[]}
+    thumbMovie: {[key in number]: {fileName: string[]; id: number; totalTime: string; date: string; aspectRatio: number; title:string;}[]}
   }
   let infoVue:InfoVue = {"yearMonthList": [], "yearList": [], "monthList": [[]],
   "birthText": {0: ""}, "gant":[], "yyyymm2pos":{}, "yyyymm2text":{}, "thumbPhoto": {}, "playPhoto": {},
@@ -46,8 +46,8 @@
   }
 
   // DOM読み込み時にメニューバーをスクロールさせる
-  const cellWidth = 40
-  const allWidth = 60
+  const cellWidth = 30
+  const allWidth = 100
   onMounted(() => {
     const pos = infoVue["yyyymm2pos"][props.selectedYYYYMM]
     let scrollLeft = 0
@@ -91,7 +91,7 @@
         {{ infoVue["birthText"][selectedYYYYMM] }}
       </span>
     </h1>
-    <h1 v-else class="title">まとめ</h1>
+    <!-- <h1 v-else class="title">Playlist</h1> -->
     <!-- サムネイル -->
     <Thumb :infoThumbMovie="infoVue['thumbMovie'][selectedYYYYMM]"
           :infoThumbPhoto="infoVue['thumbPhoto'][selectedYYYYMM]"

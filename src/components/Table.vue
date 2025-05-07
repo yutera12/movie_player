@@ -74,7 +74,7 @@
     <tr align="center">
       <td
         @click="updateYYYYMM(0)"
-        :class="{selected: 0 === selectedYYYYMM}"> ALL </td>
+        :class="{selected: 0 === selectedYYYYMM}"> Playlist </td>
       <template v-for="(mList, i) in monthList">
         <td v-for="month in mList"
           :key="String(month)"
@@ -124,7 +124,7 @@
     color: #3a2411;
   }
   .gant{
-    margin-top:2px;
+    margin-top: 2px;
     position: relative;
   }
   .line{
