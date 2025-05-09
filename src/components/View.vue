@@ -34,10 +34,6 @@
   let tooltip = ref({
     "home1": false,
     "home2": false,
-    "proceed1": false,
-    "proceed2": false,
-    "back1": false,
-    "back2": false,
     "repeat1": false,
     "repeat2": false,
     "shuffle1": false,
@@ -85,10 +81,6 @@
     tooltip.value = {
       "home1": false,
       "home2": false,
-      "proceed1": false,
-      "proceed2": false,
-      "back1": false,
-      "back2": false,
       "repeat1": false,
       "repeat2": false,
       "shuffle1": false,
@@ -99,8 +91,8 @@
       indList = [...Array(props.infoPlay.length)].map((_, i) => i)  // [0, 1, ... , infoPlay.length]
       isShuffle.value = false
     } else {
-      ind.value = 0
       indList = shuffleArray(indList)
+      ind.value = indList.indexOf(ind.value)
       isShuffle.value = true
     }
   }
@@ -116,10 +108,10 @@
     }
     return cloneArray
   }
-  const mover = (key: "home1" | "proceed1" | "back1" | "shuffle1" | "repeat1" | "home2" | "proceed2" | "back2" | "shuffle2" | "repeat2") => {
+  const mover = (key: "home1" | "shuffle1" | "repeat1" | "home2" | "shuffle2" | "repeat2") => {
     tooltip.value[key] = true
   }
-  const mleave = (key: "home1" | "proceed1" | "back1" | "shuffle1" | "repeat1" | "home2" | "proceed2" | "back2" | "shuffle2" | "repeat2") => {
+  const mleave = (key: "home1" | "shuffle1" | "repeat1" | "home2" | "shuffle2" | "repeat2") => {
     tooltip.value[key] = false
   }
 
@@ -134,30 +126,53 @@
       pause.value = true;
     }
   }
+  document.body.addEventListener("keydown",
+    event => {
+      if (event.key == "ArrowUp") {
+        toMenu()
+      }
+      else if (event.key == "ArrowLeft") {
+        back()
+      }
+      else if (event.key == "ArrowRight") {
+        proceed()
+      }
+      else if (event.key == "s") {
+        shuffle_switch()
+      }
+      else if (event.key == " ") {
+        pause_or_play()
+      }
+    }
+  )
 
 </script>
 
 <template>
   <div class = "content" style="height: 100vh; width:100vw;">
-    <img class="img" @click="pause_or_play()" :src="infoPlay[indList[ind]].fileName" style="height: 100%; width:100%; object-fit: contain ;z-index:-100; background: black" >
+    <img class="img" @click="pause_or_play()" :src="infoPlay[indList[ind]].fileName" style="height: 100%; width:100%; object-fit: contain ;z-index:-100; background: black">
     <div class="circle" style="left: 5px;" @click="toMenu()" @mouseover="mover('home1')" @mouseleave="mleave('home1')"></div>
-    <img src="/images/icon/home.png" class="icon1" style="left: 10px; bottom: 10px;" @click="toMenu()" @mouseover="mover('home2')" @mouseleave="mleave('home2')">
+    <img src="/images/icon/home.png" class="icon1" style="left: 10px; top: 10px;" @click="toMenu()" @mouseover="mover('home2')" @mouseleave="mleave('home2')">
     <div v-if="infoPlay.length > 1">
-      <div class="circle" style="left: 49px;" @click="back()" @mouseover="mover('back1')" @mouseleave="mleave('back1')"></div>
-      <div class="circle" style="left: 93px;" @click="proceed()" @mouseover="mover('proceed1')" @mouseleave="mleave('proceed1')"></div>
-      <div v-if="!isShuffle" class="circle" style="left: 137px;" @click="shuffle_switch()" @mouseover="mover('repeat1')" @mouseleave="mleave('repeat1')"></div>
-      <div v-if= "isShuffle" class="circle" style="left: 137px;" @click="shuffle_switch()" @mouseover="mover('shuffle1')" @mouseleave="mleave('shuffle1')"></div>
+      <!-- <div class="circle" style="left: 49px;" @click="back()" @mouseover="mover('back1')" @mouseleave="mleave('back1')"></div>
+      <div class="circle" style="left: 93px;" @click="proceed()" @mouseover="mover('proceed1')" @mouseleave="mleave('proceed1')"></div> -->
+      <!-- <div v-if="!isShuffle" class="circle" style="left: 137px;" @click="shuffle_switch()" @mouseover="mover('repeat1')" @mouseleave="mleave('repeat1')"></div>
+      <div v-if= "isShuffle" class="circle" style="left: 137px;" @click="shuffle_switch()" @mouseover="mover('shuffle1')" @mouseleave="mleave('shuffle1')"></div> -->
+      <div v-if="!isShuffle" class="circle" style="left: 49px;" @click="shuffle_switch()"></div>
+      <div v-if= "isShuffle" class="circle" style="left: 49px;" @click="shuffle_switch()"></div>
       
-      <img src="/images/icon/leftarrow.png" class="icon1" style="left: 54px; bottom: 8px;" @click="back()" @mouseover="mover('back2')" @mouseleave="mleave('back2')">
-      <img src="/images/icon/rightarrow.png" class="icon1" style="left: 98px; bottom: 8px;" @click="proceed()" @mouseover="mover('proceed2')" @mouseleave="mleave('proceed2')">
-      <img v-if="!isShuffle" src="/images/icon/repeat.png" class="icon1" style="left: 142px; bottom: 10px;" @click="shuffle_switch()" @mouseover="mover('repeat2')" @mouseleave="mleave('repeat2')">
-      <img v-if="isShuffle" src="/images/icon/shuffle.png" class="icon2" style="left: 143px; bottom: 11px;" @click="shuffle_switch()" @mouseover="mover('shuffle2')" @mouseleave="mleave('shuffle2')">
+      <!-- <img src="/images/icon/leftarrow.png" class="icon1" style="left: 54px; bottom: 8px;" @click="back()" @mouseover="mover('back2')" @mouseleave="mleave('back2')">
+      <img src="/images/icon/rightarrow.png" class="icon1" style="left: 98px; bottom: 8px;" @click="proceed()" @mouseover="mover('proceed2')" @mouseleave="mleave('proceed2')"> -->
+      <!-- <img v-if="!isShuffle" src="/images/icon/repeat.png" class="icon1" style="left: 142px; top: 10px;" @click="shuffle_switch()" @mouseover="mover('repeat2')" @mouseleave="mleave('repeat2')">
+      <img v-if="isShuffle" src="/images/icon/shuffle.png" class="icon2" style="left: 143px; top: 11px;" @click="shuffle_switch()" @mouseover="mover('shuffle2')" @mouseleave="mleave('shuffle2')"> -->
+      <img v-if="!isShuffle" src="/images/icon/repeat.png" class="icon1" style="left: 54px; top: 10px;" @click="shuffle_switch()">
+      <img v-if="isShuffle" src="/images/icon/shuffle.png" class="icon2" style="left: 55px; top: 11px;" @click="shuffle_switch()">
     </div>
     <div class="tooltip" style="left: 5px" v-if="tooltip['home1'] || tooltip['home2'] ">ホームに戻る</div>
-    <div class="tooltip" style="left: 49px" v-if="tooltip['back1'] || tooltip['back2']">前へ戻る</div>
-    <div class="tooltip" style="left: 93px" v-if="tooltip['proceed1'] || tooltip['proceed2']">次へ進む</div>
-    <div class="tooltip" style="left: 142px" v-if="tooltip['shuffle1'] || tooltip['shuffle2']">シャッフル</div>
-    <div class="tooltip" style="left: 142px" v-if="tooltip['repeat1'] || tooltip['repeat2']">シャッフル無し </div>
+    <!-- <div class="tooltip" style="left: 49px" v-if="tooltip['back1'] || tooltip['back2']">前へ戻る</div>
+    <div class="tooltip" style="left: 93px" v-if="tooltip['proceed1'] || tooltip['proceed2']">次へ進む</div> -->
+    <div class="tooltip" style="left: 142px" v-if="tooltip['shuffle1'] || tooltip['shuffle2']">シャッフル無しに切り替え</div>
+    <div class="tooltip" style="left: 142px" v-if="tooltip['repeat1'] || tooltip['repeat2']">シャッフル有りに切り替え </div>
     <div style="position: absolute; bottom: 5px; right: 20px; font-size: 25px; color: rgb(255,255,255,0.5)">
       <span> {{ infoPlay[indList[ind]].date }}</span>
     </div>
@@ -175,7 +190,7 @@
   border-radius:50%;
   background: rgb(255,255,255,0.5);
   position: absolute;
-  bottom: 5px;
+  top: 5px;
   cursor: pointer;
 }
 .icon1{
@@ -191,7 +206,7 @@
   cursor: pointer;
 }
 .tooltip{
-  bottom: 50px;
+  top: 50px;
   padding: 2px;
   position: absolute;
   border: solid 0.5px #3a2411;
