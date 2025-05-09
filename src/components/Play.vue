@@ -109,7 +109,6 @@
       }, 100);
   }
 
-
   const mover = (key: "home1" | "proceed1" | "back1" | "home2" | "proceed2" | "back2") => {
       tooltip.value[key] = true
   }
@@ -117,19 +116,29 @@
     tooltip.value[key] = false
   }
 
+  document.body.addEventListener("keydown",
+    event => {
+      if (event.key == "ArrowUp") {
+        toMenu()
+      }
+      else if (event.key == "ArrowLeft") {
+        back()
+      }
+      else if (event.key == "ArrowRight") {
+        proceed()
+      }
+    }
+  )
 </script>
 
 <template>
-  <video controls
+  <video controls autoplay
     id="video"
     controlslist="nodownload"
     oncontextmenu="return false"
     :src="filePaths[ind]"
     preload="metadata"
     style="position: absolute; width:100%; height: 100%; z-index:-100; background: black"
-    v-on:keydown.up="toMenu()"
-    v-on:keydown.left="back()"
-    v-on:keydown.right="proceed()"
   ></video>
   <div class="tooltip" style="left: 5px" v-if="tooltip['home1'] || tooltip['home2'] ">ホーム画面に戻る(↑)</div>
   <!-- <div class="tooltip" style="left: 49px" v-if="tooltip['back1'] || tooltip['back2']">前の動画へ戻る(←)</div>

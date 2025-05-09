@@ -2,6 +2,7 @@
   import { onMounted } from 'vue'
   import Nav from './Nav.vue'
   import Thumb from './Thumb.vue'
+  import PlayList from './PlayList.vue'
   import axios from 'axios'
 
   //////////////////////////
@@ -93,7 +94,14 @@
     </h1>
     <!-- <h1 v-else class="title">Playlist</h1> -->
     <!-- サムネイル -->
-    <Thumb :infoThumbMovie="infoVue['thumbMovie'][selectedYYYYMM]"
+    <Thumb v-if="selectedYYYYMM!=0" 
+          :infoThumbMovie="infoVue['thumbMovie'][selectedYYYYMM]"
+          :infoThumbPhoto="infoVue['thumbPhoto'][selectedYYYYMM]"
+          :selectedYYYYMM="selectedYYYYMM"
+          @go-to-play="goToPlay"
+          id="thumb"/>
+    <PlayList v-else-if="selectedYYYYMM==0" 
+          :infoThumbMovie="infoVue['thumbMovie'][selectedYYYYMM]"
           :infoThumbPhoto="infoVue['thumbPhoto'][selectedYYYYMM]"
           :selectedYYYYMM="selectedYYYYMM"
           @go-to-play="goToPlay"
