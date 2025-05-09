@@ -89,7 +89,6 @@
     const videoElem = <HTMLMediaElement>document.getElementById('video')!
     if (ind.value + 1 < filePaths.length){
       ind.value += 1
-      videoElem.currentTime = 0
       setTimeout(function(){
         videoElem.play()
       }, 100);
@@ -99,24 +98,23 @@
   // 戻るボタン
   const back = () => {
     const videoElem = <HTMLMediaElement>document.getElementById('video');
-    if(ind.value != 0){
-      ind.value -= 1
-      setTimeout(function(){
+    if (videoElem.currentTime < 1){
+      if (ind.value != 0){
+        ind.value -= 1
+      }
+    }
+    videoElem.load()
+    setTimeout(function(){
         videoElem.play()
       }, 100);
-    }
-    videoElem.currentTime = 0
   }
+
 
   const mover = (key: "home1" | "proceed1" | "back1" | "home2" | "proceed2" | "back2") => {
       tooltip.value[key] = true
   }
   const mleave = (key: "home1" | "proceed1" | "back1" | "home2" | "proceed2" | "back2") => {
     tooltip.value[key] = false
-  }
-
-  const func = (target) => {
-        console.log(target)
   }
 
 </script>
@@ -148,7 +146,7 @@
   <div style="position: absolute; bottom: 5px; right: 20px; font-size: 20px; color: rgb(255,255,255,0.5)">
     <!-- <span v-if="props.is"> {{format(retCurrentTimeLong(currentTime, ind, totalTime))}}/{{ format(retTotalTimeLong(totalTime)) }}秒, {{ind + 1}}/{{filePaths.length}}チャプタ</span> -->
     <!-- <span v-else>{{currentTime}}/{{format(totalTime[ind])}}秒</span> -->
-    <!-- <span>{{currentTime}}/{{format(totalTime[ind])}}秒</span> -->
+    <span>{{currentTime}}/{{format(totalTime[ind])}}秒</span>
   </div>
 </template>
 
