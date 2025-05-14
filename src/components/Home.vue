@@ -18,12 +18,27 @@
     yyyymm2text: {[key in number]: string}
     thumbPhoto: {[key in number]: {fileName: string; id: number; date: string; aspectRatio: number;}[]}
     playPhoto: {[key in number]:{fileName: string; date: string; id: number;}[]}
+    thumbMovie: {[key in number]: {fileName: string; id: number; totalTime: string; date: string; aspectRatio: number; title:string;}[]}
     playMovie: {[key in number]: {totalTime: number[]; fileName: string[]; id: number;}[]}
-    thumbMovie: {[key in number]: {fileName: string[]; id: number; totalTime: string; date: string; aspectRatio: number; title:string;}[]}
+    playList: {
+      "thumbnail": {[key in string]: {[tag in string]: {"fileName": string, "id": number, "date": string, "aspectRatio": number}[]}},
+      "play": {"movie": {[tag in string]: {"fileName": string, "totalTime": number, "id": number}[]},
+               "photo": {[tag in string]: {"fileName": string, "date": string, "id": number}[]}}
+    }
   }
-  let infoVue:InfoVue = {"yearMonthList": [], "yearList": [], "monthList": [[]],
-  "birthText": {0: ""}, "gant":[], "yyyymm2pos":{}, "yyyymm2text":{}, "thumbPhoto": {}, "playPhoto": {},
-  "playMovie": {}, "thumbMovie": {}}
+  let infoVue:InfoVue = {
+    "yearMonthList": [],
+    "yearList": [],
+    "monthList": [[]],
+    "birthText": {0: ""},
+    "gant":[],
+    "yyyymm2pos":{},
+    "yyyymm2text":{},
+    "thumbPhoto": {},
+    "playPhoto": {},
+    "thumbMovie": {},
+    "playMovie": {},
+    "playList": {"thumbnail": {}, "play": {"movie": {}, "photo": {}}}}
   await axios.get("images/info_vue.json").then(function(response) {
     infoVue = response.data
   })
@@ -31,19 +46,34 @@
   // App.vueから情報を受けとり
   const props = defineProps<{
     selectedYYYYMM: number
+    currentTag: string
   }>();
 
   // App.vueで定義されるイベントを発火
-  const emit = defineEmits(['go-to-play-movie', 'go-to-play-photo', 'change-yyyymm'])
-  const goToPlay = (id: number, isMovie:boolean) => { // 何番目のサムネイルをクリックしたかを受け取る
+  const emit = defineEmits(['go-to-play-movie', 'go-to-play-photo', 'select-tag', 'change-yyyymm', 'go-to-playlist'])
+  const goToPlay = (index: number, isMovie:boolean) => { // 何番目のサムネイルをクリックしたかを受け取る
     if (isMovie){
-      emit('go-to-play-movie', infoVue["playMovie"][props.selectedYYYYMM], id, props.selectedYYYYMM === 0)
+      if (props.selectedYYYYMM == 0){
+        emit('go-to-play-movie', infoVue["playList"]["play"]["movie"][props.currentTag], index)
+      } else {
+        emit('go-to-play-movie', infoVue["playMovie"][props.selectedYYYYMM], index)
+      }
     } else {
-      emit('go-to-play-photo', infoVue["playPhoto"][props.selectedYYYYMM], id)
+      if (props.selectedYYYYMM == 0){
+        emit('go-to-play-photo', infoVue["playList"]["play"]["photo"][props.currentTag], index)
+      } else {
+        emit('go-to-play-photo', infoVue["playPhoto"][props.selectedYYYYMM], index)
+      }
     }
+  }
+  const goToPlaylist = () => {
+    emit('go-to-playlist')
   }
   const changeYYYYMM = (yyyymm: number) => {  // 何年何月が選択されたかを受け取る
     emit('change-yyyymm', yyyymm)
+  }
+  const selectTag = (tag: string) => {
+    emit('select-tag', tag)
   }
 
   // DOM読み込み時にメニューバーをスクロールさせる
@@ -69,7 +99,6 @@
     const idx = infoVue["yearMonthList"].indexOf(props.selectedYYYYMM)
     emit('change-yyyymm', infoVue["yearMonthList"][idx - 1])
   }
-
 </script>
 
 <template>
@@ -86,33 +115,41 @@
 
   <!-- 上部見出し -->
   <div class="wrapper">
-    <h1 v-if="selectedYYYYMM != 0" class="title">
-      {{infoVue['yyyymm2text'][selectedYYYYMM]}}
+    <h1 class="title">
+      <span v-if="selectedYYYYMM != 0"> {{infoVue['yyyymm2text'][selectedYYYYMM]}}</span>
+      <span v-else-if="currentTag==''"> Playlist</span>
+      <span v-else> {{currentTag }} </span>
       <span class="birth-info">
         {{ infoVue["birthText"][selectedYYYYMM] }}
       </span>
+      <span v-if="selectedYYYYMM == 0 && currentTag != ''">
+          <span class="link" style="float: right;" @click="goToPlaylist"> <u>PlayList へ戻る</u>
+          </span>
+      </span>
     </h1>
-    <!-- <h1 v-else class="title">Playlist</h1> -->
-    <!-- サムネイル -->
-    <Thumb v-if="selectedYYYYMM!=0" 
-          :infoThumbMovie="infoVue['thumbMovie'][selectedYYYYMM]"
-          :infoThumbPhoto="infoVue['thumbPhoto'][selectedYYYYMM]"
-          :selectedYYYYMM="selectedYYYYMM"
-          @go-to-play="goToPlay"
-          id="thumb"/>
-    <PlayList v-else-if="selectedYYYYMM==0" 
-          :infoThumbMovie="infoVue['thumbMovie'][selectedYYYYMM]"
-          :infoThumbPhoto="infoVue['thumbPhoto'][selectedYYYYMM]"
-          :selectedYYYYMM="selectedYYYYMM"
-          @go-to-play="goToPlay"
-          id="thumb"/>
 
+    <Thumb v-if="selectedYYYYMM !=0" 
+          :infoThumbMovie="infoVue['thumbMovie'][selectedYYYYMM]"
+          :infoThumbPhoto="infoVue['thumbPhoto'][selectedYYYYMM]"
+          :selectedYYYYMM="selectedYYYYMM"
+          @go-to-play="goToPlay"
+          id="thumb"/>
+    <PlayList v-if="selectedYYYYMM==0 && currentTag==''" 
+          :thumbnail="infoVue['playList']['thumbnail']['all']"
+          @select-tag="selectTag"
+          id="playlist"/>
+    <Thumb v-if="selectedYYYYMM==0 && currentTag!=''"
+          :infoThumbMovie="infoVue['playList']['thumbnail']['movie'][currentTag]"
+          :infoThumbPhoto="infoVue['playList']['thumbnail']['photo'][currentTag]"
+          :selectedYYYYMM="selectedYYYYMM"
+          @go-to-play="goToPlay"
+          id="thumb"/>
     <!-- 下部のページ移動リンク -->
     <template v-if="selectedYYYYMM !== 0">
       <div class="bottom-link">
         <template v-if="selectedYYYYMM !== infoVue['yearMonthList'][0]">
           <span class="link" @click="previousMonth">
-            <u >前の月</u>
+            <u>前の月</u>
           </span>
           ＜
         </template>

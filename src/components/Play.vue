@@ -6,24 +6,12 @@
   type InfoPlayMovie = {
     totalTime: number;
     fileName: string;
+    id: number;
   }[]
 
   // 少数第2位を四捨五入
   const format = (val:number) => {
     return Math.round(val * 10) / 10
-  }
-
-  // long動画において、現在の再生時間を返す
-  const retCurrentTimeLong = (currentTime:number, index:number, totalTime:number[]) => {
-    let addTime = 0
-    if (index !== 0){
-      addTime = totalTime.slice(0, index).reduce(function(sum, element){return sum + element;}, 0)
-    }
-    return currentTime + addTime
-  }
-  // long動画において、総再生時間を返す
-  const retTotalTimeLong = (totalTime: number[]) => {
-    return totalTime.reduce(function(sum, element){return sum + element;}, 0)
   }
 
   // App.vueのイベントを発火
@@ -38,6 +26,7 @@
     index: number
   }>();
   let ind = ref(props.index)
+  let info = ref(true)
   let filePaths:string[] = []
   let totalTime:number[] = []
   props.infoPlayMovie.forEach(function(d, i){
@@ -46,11 +35,7 @@
   })
   let tooltip = ref({
     "home1": false,
-    "home2": false,
-    "proceed1": false,
-    "proceed2": false,
-    "back1": false,
-    "back2": false
+    "home2": false
   })
   let currentTime = ref(0)  // 現在の再生時間
 
@@ -72,19 +57,13 @@
     document.documentElement.requestFullscreen();
   })
 
-  // homeボタン
-  const toMenu = () => {
+  // home
+  const toHome = () => {
     document.exitFullscreen()
     goToHome()
   }
 
-  // スキップボタン
-  const skipSecond = (s: number) => {
-    const videoElem = <HTMLMediaElement>document.getElementById('video');
-    videoElem.currentTime = Math.min(Math.max(videoElem.currentTime + s, 0), totalTime[ind.value])
-  }
-
-  // 進むボタン
+  // 進む
   const proceed = () => {
     const videoElem = <HTMLMediaElement>document.getElementById('video')!
     if (ind.value + 1 < filePaths.length){
@@ -95,7 +74,7 @@
     }
   }
 
-  // 戻るボタン
+  // 戻る
   const back = () => {
     const videoElem = <HTMLMediaElement>document.getElementById('video');
     if (videoElem.currentTime < 1){
@@ -109,23 +88,32 @@
       }, 100);
   }
 
-  const mover = (key: "home1" | "proceed1" | "back1" | "home2" | "proceed2" | "back2") => {
+  const mover = (key: "home1" | "home2") => {
       tooltip.value[key] = true
   }
-  const mleave = (key: "home1" | "proceed1" | "back1" | "home2" | "proceed2" | "back2") => {
+  const mleave = (key: "home1" | "home2") => {
     tooltip.value[key] = false
   }
-
+  const change_info = () => {
+    if (info.value) {
+      info.value = false
+    } else {
+      info.value = true
+    }
+  }
   document.body.addEventListener("keydown",
     event => {
       if (event.key == "ArrowUp") {
-        toMenu()
+        toHome()
       }
       else if (event.key == "ArrowLeft") {
         back()
       }
       else if (event.key == "ArrowRight") {
         proceed()
+      }
+      else if (event.key == "i") {
+        change_info()
       }
     }
   )
@@ -140,23 +128,11 @@
     preload="metadata"
     style="position: absolute; width:100%; height: 100%; z-index:-100; background: black"
   ></video>
-  <div class="tooltip" style="left: 5px" v-if="tooltip['home1'] || tooltip['home2'] ">ホーム画面に戻る(↑)</div>
-  <!-- <div class="tooltip" style="left: 49px" v-if="tooltip['back1'] || tooltip['back2']">前の動画へ戻る(←)</div>
-  <div class="tooltip" style="left: 93px" v-if="tooltip['proceed1'] || tooltip['proceed2']">次の動画へ進む(→)</div> -->
-
-  <div class="circle" style="left: 5px;"  @click="toMenu()" @mouseover="mover('home1')" @mouseleave="mleave('home1')"></div>
-  <!-- <div class="circle" style="left: 46px;" @click="back()" @mouseover="mover('back1')" @mouseleave="mleave('back1')"></div>
-  <div v-if="filePaths.length > 1" class="circle" style="left: 88px;" @click="proceed()" @mouseover="mover('proceed1')" @mouseleave="mleave('proceed1')"></div> -->
-
-  <img src="/images/icon/home.png" class="icon" style="left: 10px;" @click="toMenu()" @mouseover="mover('home2')" @mouseleave="mleave('home2')">
-  <!-- <img src="/images/icon/leftarrow.png" class="icon" style="left: 52px;" @click="back()" @mouseover="mover('back2')" @mouseleave="mleave('back2')">
-  <img v-if="filePaths.length > 1" src="/images/icon/rightarrow.png" class="icon" style="left: 93px;" @click="proceed()" @mouseover="mover('proceed2')" @mouseleave="mleave('proceed2')"> -->
-
-  <div style="position: absolute; bottom: 5px; right: 20px; font-size: 20px; color: rgb(255,255,255,0.5)">
-    <!-- <span v-if="props.is"> {{format(retCurrentTimeLong(currentTime, ind, totalTime))}}/{{ format(retTotalTimeLong(totalTime)) }}秒, {{ind + 1}}/{{filePaths.length}}チャプタ</span> -->
-    <!-- <span v-else>{{currentTime}}/{{format(totalTime[ind])}}秒</span> -->
-    <span>{{currentTime}}/{{format(totalTime[ind])}}秒</span>
-  </div>
+  <template v-if="info == true">
+    <div class="tooltip" style="left: 5px" v-if="tooltip['home1'] || tooltip['home2'] ">ホーム画面に戻る(↑)</div>
+    <div class="circle" style="left: 5px;"  @click="toHome()" @mouseover="mover('home1')" @mouseleave="mleave('home1')"></div>
+    <img src="/images/icon/home.png" class="icon" style="left: 10px;" @click="toHome()" @mouseover="mover('home2')" @mouseleave="mleave('home2')">
+  </template>
 </template>
 
 <style scoped>

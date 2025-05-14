@@ -1,13 +1,11 @@
 <script setup lang="ts">
 
- defineProps<{
+  defineProps<{
     infoThumbMovie: {
-      fileName: string[];
+      fileName: string;
       id: number;
-      totalTime: string;
       date: string;
       aspectRatio: number;
-      title: string;
     }[],
     infoThumbPhoto: {
       fileName: string;
@@ -20,12 +18,8 @@
 
   // Home.vueで定義されるイベントを発火
   const emit = defineEmits(['go-to-play'])
-  const goToPlay = (id: number, isMovie: boolean) => { // 何番目のサムネイルが選択されたか
-    emit('go-to-play', id, isMovie)
-  }
-
-  const randomSelect = (fileNames: string[]) => {
-    return fileNames[Math.floor(Math.random() * fileNames.length)]
+  const goToPlay = (index: number, isMovie: boolean) => { // 何番目のサムネイルが選択されたか
+    emit('go-to-play', index, isMovie)
   }
 
   const retStyle = (aspectRatio: number, base: number) => {
@@ -50,20 +44,17 @@
     <div class="grid">
       <template v-for="(v, index) in infoThumbMovie" :key="v.id">
         <div :style="retStyle(v.aspectRatio, 16 / 9)">
-          <h3 v-if="v.title != ''" class="movieTitle">{{ v.title }}</h3>
-          <img :src="randomSelect(v.fileName)"
+          <img :src="v.fileName"
                 class="item" @click="goToPlay(index, true)">
           <p class="item time-date">
-            <div class="time">{{ v.totalTime }}</div>
             <div class="date">{{ v.date }}</div>
           </p>
         </div>
       </template>
     </div>
   </div>
-  <div v-if="infoThumbPhoto.length > 0 || selectedYYYYMM == 0">
+  <div v-if="infoThumbPhoto.length > 0">
     <h2 class="index">写真</h2>
-    <span v-if="selectedYYYYMM == 0" class="index2" @click="goToPlay(0, false)">全写真スライドショー</span>
     <div class="grid">
       <template v-for="(v, index) in infoThumbPhoto" :key="v.id">
         <div :style="retStyle(v.aspectRatio, 4 / 3)">

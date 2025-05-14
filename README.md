@@ -43,6 +43,7 @@ App
 |  |  |--Table
 |  |
 |  |--Thumb
+|  |--ThumbPlayList
 |
 |--Play
 |--View
@@ -51,4 +52,5 @@ App
 * 思想
   * `Home`で設定ファイルを読み込み
   * どの月を選択したか: `Table` -> `Nav` -> `Home` -> `App` -> `Home` -> `Thumb`
-  * どの動画を再生するか: `Thumb` -> id -> `Home` -> info, id -> `App` -> info, id -> `Play`
+  * どの動画を再生するか:        `Thumbyyyymm`   -> id -> `Home` -> info, id -> `App` -> info, id -> `Play`
+  * どのプレイリストを選択したか: `ThumbPlayList` -> tag -> `Home` -> info, id -> `Thumb`

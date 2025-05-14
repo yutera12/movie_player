@@ -1,31 +1,21 @@
 <script setup lang="ts">
 
- defineProps<{
-    infoThumbMovie: {
-      fileName: string[];
-      id: number;
-      totalTime: string;
-      date: string;
-      aspectRatio: number;
-      title: string;
-    }[],
-    infoThumbPhoto: {
-      fileName: string;
-      id: number;
-      date: string;
-      aspectRatio: number;
-    }[],
-    selectedYYYYMM: number
+  const props = defineProps<{
+    thumbnail: {[key in string]: {"fileName": string, "id": number, "date": string, "aspectRatio": number}[]}
   }>();
+  console.log(props.thumbnail)
 
   // Home.vueで定義されるイベントを発火
-  const emit = defineEmits(['go-to-play'])
-  const goToPlay = (id: number, isMovie: boolean) => { // 何番目のサムネイルが選択されたか
-    emit('go-to-play', id, isMovie)
+  const emit = defineEmits(['select-tag'])
+  const selectTag = (tag: string) => { // 何番目のサムネイルが選択されたか
+    emit('select-tag', tag)
   }
 
-  const randomSelect = (fileNames: string[]) => {
-    return fileNames[Math.floor(Math.random() * fileNames.length)]
+  
+  let ind : {[key in string]: number}
+  ind = {}
+  for (let key in props.thumbnail){
+    ind[key] = Math.floor(Math.random() * props.thumbnail[key].length)
   }
 
   const retStyle = (aspectRatio: number, base: number) => {
@@ -41,42 +31,17 @@
     }
     return {'margin-left': margin + "%", 'margin-right': margin + "%"}
   }
+
 </script>
 
 
 <template>
-  <div v-if="infoThumbMovie.length > 0">
-    <h2 class="index">動画</h2>
-    <div class="grid">
-      <template v-for="(v, index) in infoThumbMovie" :key="v.id">
-        <div :style="retStyle(v.aspectRatio, 16 / 9)">
-          <h3 v-if="v.title != ''" class="movieTitle">{{ v.title }}</h3>
-          <img :src="randomSelect(v.fileName)"
-                class="item" @click="goToPlay(index, true)">
-          <p class="item time-date">
-            <div class="time">{{ v.totalTime }}</div>
-            <div class="date">{{ v.date }}</div>
-          </p>
-        </div>
-      </template>
-    </div>
-  </div>
-  <div v-if="infoThumbPhoto.length > 0 || selectedYYYYMM == 0">
-    <h2 class="index">写真</h2>
-    <span v-if="selectedYYYYMM == 0" class="index2" @click="goToPlay(0, false)">全写真スライドショー</span>
-    <div class="grid">
-      <template v-for="(v, index) in infoThumbPhoto" :key="v.id">
-        <div :style="retStyle(v.aspectRatio, 4 / 3)">
-          <img :src="v.fileName"
-                class="item" @click="goToPlay(index, false)">
-          <p class="item time-date">
-            <div class="date">{{ v.date }}</div>
-          </p>
-        </div>
-      </template>
-    </div>
-  </div>
-
+  <template v-for="(value, tag, index) in thumbnail" :key="value[ind[tag]].id"> 
+    <h2 class="index">{{ tag }}</h2>
+      <div :style="retStyle(value[ind[tag]]['aspectRatio'], 16 / 9)">
+          <img :src="value[ind[tag]]['fileName']" class="item" @click="selectTag(tag)">
+      </div>
+  </template>
 
 </template>
 
