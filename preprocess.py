@@ -238,6 +238,16 @@ def main():
     photoFiles, movieFiles = selectFiles(os.listdir("images/images"))
     with open("images/info.json", "r", encoding="utf-8") as f:
         info_input = json.load(f)
+    if set(photoFiles) != set(info_input["photo"].keys()):
+        diff1 = set(photoFiles) - set(info_input["photo"].keys())
+        diff2 = set(info_input["photo"].keys()) - set(photoFiles)
+        assert len(diff1) == 0, f"ファイルが存在するのにもかかわらずinfo.jsonに存在しない:\n{'\n'.join(sorted(list(diff1)))}"
+        assert len(diff2) == 0, f"info.jsonに存在するのにもかかわらずにファイルとして存在しない:\n{'\n'.join(sorted(list(diff2)))}"
+    if set(movieFiles) != set(info_input["movie"].keys()):
+        diff1 = set(movieFiles) - set(info_input["movie"].keys())
+        diff2 = set(info_input["movie"].keys()) - set(movieFiles)
+        assert len(diff1) == 0, f"ファイルが存在するのにもかかわらずinfo.jsonに存在しない:\n{'\n'.join(sorted(list(diff1)))}"
+        assert len(diff2) == 0, f"info.jsonに存在するのにもかかわらずにファイルとして存在しない:\n{'\n'.join(sorted(list(diff2)))}"
 
     tag_list = []
     for x in list(info_input["movie"].values()) + list(info_input["photo"].values()):
